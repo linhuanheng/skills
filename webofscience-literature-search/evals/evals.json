@@ -1,0 +1,40 @@
+{
+  "skill_name": "webofscience-literature-search",
+  "evals": [
+    {
+      "id": 1,
+      "name": "基础关键词检索测试",
+      "prompt": "请使用 webofscience-literature-search skill，在 Web of Science 上检索关于'machine learning in economics'的文献。获取前 10 篇相关文献的基本信息（标题、作者、期刊、年份），并以表格形式展示结果。",
+      "expected_output": "生成包含 10 篇文献信息的 Markdown 表格，包含标题、作者、期刊、年份列，并说明使用的检索策略和 web-access 操作步骤。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "期刊选择检索测试",
+      "prompt": "我想检索关于'identification strategy'的文献，但只想要发表在顶级经济学期刊上的文章。请使用 webofscience-literature-search skill 的期刊选择功能，让我选择期刊范围，然后获取检索结果。",
+      "expected_output": "使用 AskUserQuestion 展示期刊选项（全部期刊/顶级综合期刊/计量经济学/宏观经济学/金融学等），用户选择'顶级综合期刊'后构建检索式 TS=(identification strategy) AND (SO=(American Economic Review) OR SO=(Econometrica) OR SO=(QJE)...），列出检索到的文献列表。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "多期刊组合检索测试",
+      "prompt": "请帮我检索 2019-2024 年间发表在计量经济学期刊上关于'panel data'的文献。我想同时检索 Journal of Econometrics 和 Econometric Theory 这两本期刊。",
+      "expected_output": "使用 AskUserQuestion 让用户确认期刊选择和年份范围，构建检索式 TS=(panel data) AND (SO=(Journal of Econometrics) OR SO=(Econometric Theory)) AND PY=(2019-2024)，展示结果列表。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "高级检索测试",
+      "prompt": "我需要查找 2020-2024 年间发表在'Journal of Econometrics'上，标题包含'causal inference'的文献。请使用 webofscience-literature-search skill 的高级检索功能，构建合适的检索式并获取结果。",
+      "expected_output": "展示构建的高级检索式（如：TI=(causal inference) AND SO=(Journal of Econometrics) AND PY=(2020-2024)），列出检索到的文献列表，包含 DOI 和被引次数信息。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "引文检索测试",
+      "prompt": "有一篇重要文献：'Angrist, J. D., & Pischke, J. S. (2009). Mostly harmless econometrics: An empiricist's companion. Princeton university press.' 请使用 webofscience-literature-search skill 查找这篇文献的被引情况，获取引用它的前 5 篇文献信息。",
+      "expected_output": "展示目标文献的基本信息，列出引用该文献的前 5 篇文献的标题、作者、年份和被引次数，说明引文检索的操作流程。",
+      "files": []
+    }
+  ]
+}
