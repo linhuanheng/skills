@@ -124,7 +124,7 @@ web-access
 
 - [Claude Code 官方文档](https://claude.com/claude-code)
 - [web-access 官网](https://web-access.eze.is)
-- [Zotero MCP 服务器](https://github.com/cwilby/zotero-mcp)
+- [Zotero MCP 服务器](https://github.com/cookjohn/zotero-mcp)
 - [skills CLI 包管理器](https://github.com/vercel-labs/skills)
 
 ## 👥 作者与贡献
