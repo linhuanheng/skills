@@ -5,7 +5,7 @@
 ## 📁 项目结构
 
 ```
-skill_production/
+skills/
 ├── economic-model-derivation-guidance/    # 经济模型推导指导技能
 ├── literature-review-economics/           # 经济金融学文献整理总结技能
 ├── web-access/                           # 网页访问技能（基础依赖）
