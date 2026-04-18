@@ -133,7 +133,7 @@ web-access
 
 **技能来源**：
 - `web-access`：由 [一泽 Eze](https://github.com/eze-is) 开发
-- 其他技能：某个不想干体力活的PhD Student
+- `其他技能`：某个不想干体力活的[PhD Student](https://github.com/linhuanheng)
 
 ---
 
