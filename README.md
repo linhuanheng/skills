@@ -104,6 +104,7 @@ web-access
 2. **Chrome 浏览器**：开启远程调试（chrome://inspect/#remote-debugging）
 3. **Zotero 及 zotero-mcp 服务器**：用于 `literature-review-economics` 技能
 4. **Web of Science 账号**：用于 `webofscience-literature-search` 技能（需机构订阅）
+5. **MarkItDown MCP服务**: 用于`literature-review-economics`技能
 
 
 ## 📝 开发状态
@@ -126,6 +127,7 @@ web-access
 - [web-access 官网](https://web-access.eze.is)
 - [Zotero MCP 服务器](https://github.com/cookjohn/zotero-mcp)
 - [skills CLI 包管理器](https://github.com/vercel-labs/skills)
+- [MarkItDown MCP 服务器](https://github.com/mcp/microsoft/markitdown)
 
 ## 👥 作者与贡献
 
