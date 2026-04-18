@@ -54,11 +54,11 @@ skills/
 - 联网策略自动选择：WebSearch / WebFetch / curl / Jina / CDP
 - 站点经验积累：按域名存储操作经验，跨 session 复用
 - 并行分治：多目标时分发子 Agent 并行执行
-- 自动关闭功能：默认 5 分钟空闲超时自动关闭 Proxy (由某个不想干体力活的[PhD Student](https://github.com/linhuanheng)开发补充)
+- 自动关闭功能：默认 5 分钟空闲超时自动关闭 Proxy ([由某个不想干体力活的PhD Student](https://github.com/linhuanheng)开发补充)
 
 **技术依赖**：
 - Node.js 22+ 和 Chrome 开启远程调试
-- 支持端口冲突自动检测并切换 (由某个不想干体力活的[PhD Student](https://github.com/linhuanheng)开发补充)
+- 支持端口冲突自动检测并切换 ([由某个不想干体力活的PhD Student](https://github.com/linhuanheng)开发补充)
 
 ### 4. **webofscience-literature-search** - Web of Science 学术文献检索工具
 **功能**：指导使用 web-access 在 Web of Science 平台进行专业学术文献检索。
@@ -135,7 +135,7 @@ web-access
 
 **技能来源**：
 - `web-access`：由 [一泽 Eze](https://github.com/eze-is) 开发
-- `其他技能`：某个不想干体力活的[PhD Student](https://github.com/linhuanheng)
+- `其他技能`：[某个不想干体力活的PhD Student](https://github.com/linhuanheng)
 
 ---
 
