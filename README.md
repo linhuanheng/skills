@@ -6,6 +6,7 @@
 
 ```
 skills/
+├── data-analysis/                        # 数据分析技能
 ├── economic-model-derivation-guidance/    # 经济模型推导指导技能
 ├── literature-review-economics/           # 经济金融学文献整理总结技能
 ├── web-access/                           # 网页访问技能（基础依赖）
@@ -14,7 +15,33 @@ skills/
 
 ## 🔧 技能清单
 
-### 1. **economic-model-derivation-guidance** - 经济学模型推导指导
+### 1. **data-analysis** - 数据分析技能
+**功能**：使用 Python 脚本对数据进行描述性统计、缺失值分析、异常值检测、数据类型识别、自相关分析和平稳性检验，并生成结构化的 Markdown 报告。
+
+**核心特点**：
+- 自动识别数据类型（横截面/时间序列/面板数据）
+- 完整的缺失值分析（整体统计、分类、模式识别、相关性分析）
+- 根据缺失程度提供针对性处理建议（轻度/中度/严重）
+- IQR 方法检测异常值
+- 时间序列/面板数据的自相关分析（自相关系数、Ljung-Box 检验）
+- 平稳性检验（ADF 检验、KPSS 检验）
+- AI 交互式语义异常值分析（根据变量说明文档检测不符合现实情况的异常值）
+- 生成结构化的 Markdown 报告
+
+**适用场景**：
+- 数据探索和初步分析
+- 数据质量检查（缺失值、异常值）
+- 时间序列数据分析（宏观经济数据、金融数据等）
+- 面板数据分析（企业数据、地区数据等）
+- 生成数据报告用于分享或文档记录
+
+**使用方法**：
+```bash
+cd data-analysis
+python scripts/descriptive_stats.py --input your_data.csv --output report.md
+```
+
+### 2. **economic-model-derivation-guidance** - 经济学模型推导指导
 **功能**：详细指导和规范经济学模型推导过程，从问题设定到均衡分析和比较静态，遵循严谨的经济学建模规范。
 
 **核心特点**：
@@ -29,7 +56,7 @@ skills/
 - 经济学课程作业辅导
 - 专业经济学论文撰写
 
-### 2. **literature-review-economics** - 经济金融学文献综述整理总结工具
+### 3. **literature-review-economics** - 经济金融学文献综述整理总结工具
 **功能**：依赖 zotero-mcp 服务器与 Zotero 交互，提供结构化整理、综述生成、对比分析等功能。
 
 **核心特点**：
@@ -46,7 +73,7 @@ skills/
 - 文献对比分析
 - 学术论文背景研究
 
-### 3. **web-access** - 网页访问技能（基础依赖）
+### 4. **web-access** - 网页访问技能（基础依赖）
 **功能**：所有联网操作必须通过此 skill 处理，包括搜索、网页抓取、登录后操作、网络交互等。
 
 **核心特点**：
@@ -54,13 +81,13 @@ skills/
 - 联网策略自动选择：WebSearch / WebFetch / curl / Jina / CDP
 - 站点经验积累：按域名存储操作经验，跨 session 复用
 - 并行分治：多目标时分发子 Agent 并行执行
-- 自动关闭功能：默认 5 分钟空闲超时自动关闭 Proxy ([由某个不想干体力活的PhD Student](https://github.com/linhuanheng)开发补充)
+- 自动关闭功能：默认 5 分钟空闲超时自动关闭 Proxy ([由某个不想干体力活的 PhD Student](https://github.com/linhuanheng) 开发补充)
 
 **技术依赖**：
 - Node.js 22+ 和 Chrome 开启远程调试
-- 支持端口冲突自动检测并切换 ([由某个不想干体力活的PhD Student](https://github.com/linhuanheng)开发补充)
+- 支持端口冲突自动检测并切换 ([由某个不想干体力活的 PhD Student](https://github.com/linhuanheng) 开发补充)
 
-### 4. **webofscience-literature-search** - Web of Science 学术文献检索工具
+### 5. **webofscience-literature-search** - Web of Science 学术文献检索工具
 **功能**：指导使用 web-access 在 Web of Science 平台进行专业学术文献检索。
 
 **核心特点**：
@@ -82,17 +109,22 @@ skills/
 web-access
     ├── webofscience-literature-search（依赖 web-access 进行网页访问）
     └── literature-review-economics（可结合 webofscience-literature-search 获取文献）
+
+data-analysis
+    └── 独立运行（依赖 Python 及 pandas、numpy、scipy、statsmodels）
 ```
 
 ## 🚀 使用流程示例
 
 ### 学术研究完整流程
-1. **文献检索**：使用 `webofscience-literature-search` 检索相关文献
-2. **文献整理**：使用 `literature-review-economics` 整理检索到的文献
-3. **理论建模**：使用 `economic-model-derivation-guidance` 构建理论模型
-4. **实证分析**：如有实证部分，可结合其他工具进行分析
+1. **数据准备**：使用 `data-analysis` 进行数据探索和质量检查
+2. **文献检索**：使用 `webofscience-literature-search` 检索相关文献
+3. **文献整理**：使用 `literature-review-economics` 整理检索到的文献
+4. **理论建模**：使用 `economic-model-derivation-guidance` 构建理论模型
+5. **实证分析**：如有实证部分，可结合其他工具进行分析
 
 ### 单一技能使用
+- 仅需数据分析时：直接使用 `data-analysis`
 - 仅需文献整理时：直接使用 `literature-review-economics`
 - 仅需理论推导时：直接使用 `economic-model-derivation-guidance`
 - 仅需网页访问时：直接使用 `web-access`
@@ -104,11 +136,14 @@ web-access
 2. **Chrome 浏览器**：开启远程调试（chrome://inspect/#remote-debugging）
 3. **Zotero 及 zotero-mcp 服务器**：用于 `literature-review-economics` 技能
 4. **Web of Science 账号**：用于 `webofscience-literature-search` 技能（需机构订阅）
-5. **MarkItDown MCP服务**: 用于`literature-review-economics`技能
+5. **MarkItDown MCP 服务**: 用于 `literature-review-economics` 技能
+6. **Python 3.8+**：用于 `data-analysis` 技能
+7. **Python 依赖库**：pandas、numpy、scipy、statsmodels（用于 `data-analysis` 技能）
 
 
 ## 📝 开发状态
 
+- ✅ **data-analysis**：完整，包含描述性统计、缺失值分析、异常值检测、数据类型识别、自相关分析、平稳性检验
 - ✅ **economic-model-derivation-guidance**：完整，已包含完整推导流程
 - ✅ **literature-review-economics**：完整，已实现智能文献类型判断
 - ✅ **web-access**：完整，v2.4.3 版本
@@ -135,8 +170,8 @@ web-access
 
 **技能来源**：
 - `web-access`：由 [一泽 Eze](https://github.com/eze-is) 开发
-- `其他技能`：[某个不想干体力活的PhD Student](https://github.com/linhuanheng)
+- `其他技能`：[某个不想干体力活的 PhD Student](https://github.com/linhuanheng)
 
 ---
 
-*最后更新：2026年4月18日*
+*最后更新：2026 年 4 月 19 日*
