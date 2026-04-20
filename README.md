@@ -164,6 +164,10 @@ data-analysis
 - [skills CLI 包管理器](https://github.com/vercel-labs/skills)
 - [MarkItDown MCP 服务器](https://github.com/mcp/microsoft/markitdown)
 
+## ⚠ 问题与改进建议
+
+当前为一个私有项目，因此只有合作者能够看到。大家使用后有啥问题或者觉得可以改进的地方，欢迎在Issues中留言~
+
 ## 👥 作者与贡献
 
 本项目为 Claude Code Skills 开发项目，各技能基于开源社区成果和自定义开发。
@@ -174,4 +178,4 @@ data-analysis
 
 ---
 
-*最后更新：2026 年 4 月 19 日*
+*最后更新：2026 年 4 月 20 日*
