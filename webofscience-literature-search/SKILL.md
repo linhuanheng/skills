@@ -137,9 +137,38 @@ description: 指导 AI 使用 web-access 在 Web of Science 平台进行专业�
 ## 操作指南
 
 ### 第一步：初始化 web-access
+
+**通用方式（推荐）**：
 ```bash
-node "C:/Users/15815/.claude/plugins/cache/web-access/web-access/2.4.2/scripts/check-deps.mjs"
+# 如果web-access已正确安装为Claude Code插件，会自动配置环境变量
+node "$(claude-plugin-path web-access)/scripts/check-deps.mjs"
 ```
+
+**Windows系统**：
+```bash
+# 方法1：使用Claude Code插件路径（推荐）
+node "%CLAUDE_PLUGINS_CACHE%/web-access/web-access/current/scripts/check-deps.mjs"
+
+# 方法2：如果插件安装在默认位置
+node "C:/Users/%USERNAME%/.claude/plugins/cache/web-access/web-access/current/scripts/check-deps.mjs"
+
+# 方法3：相对路径（如果已在项目目录中）
+node "../web-access/scripts/check-deps.mjs"
+```
+
+**macOS/Linux系统**：
+```bash
+# 方法1：使用Claude Code插件路径（推荐）
+node "$HOME/.claude/plugins/cache/web-access/web-access/current/scripts/check-deps.mjs"
+
+# 方法2：相对路径（如果已在项目目录中）
+node "../web-access/scripts/check-deps.mjs"
+```
+
+**环境变量说明**：
+- `CLAUDE_PLUGINS_CACHE`: Claude Code插件的缓存目录路径
+- `%USERNAME%` (Windows) / `$USER` (macOS/Linux): 当前用户名
+- `current`: 指向最新版本web-access插件的符号链接
 
 ### 第二步：导航到 Web of Science
 ```bash
@@ -583,19 +612,61 @@ const jsonContent = JSON.stringify(exportData, null, 2);
 
 #### 文件保存
 
-**保存完整 CSV 文件**：
+**通用方法（JavaScript/Node.js，推荐）**：
+使用JavaScript生成时间戳，适用于所有平台：
+
+```javascript
+// 生成时间戳
+const timestamp = new Date().toISOString()
+  .replace(/[:.]/g, '-')
+  .replace('T', '_')
+  .slice(0, 19); // YYYY-MM-DD_HH-MM-SS
+
+// 保存完整 CSV 文件
+const fs = require('fs');
+fs.writeFileSync(`webofscience_full_results_${timestamp}.csv`, csvContent);
+
+// 保存简化 CSV 文件
+fs.writeFileSync(`webofscience_core_results_${timestamp}.csv`, coreCsvContent);
+
+// 保存 JSON 文件
+fs.writeFileSync(`webofscience_structured_results_${timestamp}.json`, jsonContent);
+```
+
+**macOS/Linux 系统**：
 ```bash
+# 保存完整 CSV 文件
 echo "$csvContent" > "webofscience_full_results_$(date +%Y%m%d_%H%M%S).csv"
-```
 
-**保存简化 CSV 文件**：
-```bash
+# 保存简化 CSV 文件
 echo "$coreCsvContent" > "webofscience_core_results_$(date +%Y%m%d_%H%M%S).csv"
+
+# 保存 JSON 文件
+echo "$jsonContent" > "webofscience_structured_results_$(date +%Y%m%d_%H%M%S).json"
 ```
 
-**保存 JSON 文件**：
-```bash
-echo "$jsonContent" > "webofscience_structured_results_$(date +%Y%m%d_%H%M%S).json"
+**Windows 系统**：
+```batch
+:: 保存完整 CSV 文件
+echo %csvContent% > "webofscience_full_results_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.csv"
+
+:: 保存简化 CSV 文件
+echo %coreCsvContent% > "webofscience_core_results_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.csv"
+
+:: 保存 JSON 文件
+echo %jsonContent% > "webofscience_structured_results_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json"
+```
+
+**PowerShell（Windows）**：
+```powershell
+# 保存完整 CSV 文件
+$csvContent | Out-File -FilePath "webofscience_full_results_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
+
+# 保存简化 CSV 文件
+$coreCsvContent | Out-File -FilePath "webofscience_core_results_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
+
+# 保存 JSON 文件
+$jsonContent | Out-File -FilePath "webofscience_structured_results_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
 ```
 
 #### 数据验证和完整性检查
@@ -866,8 +937,34 @@ ${highlyCitedPapers.join('\n')}
 #### 汇总报告导出
 
 将选择的汇总维度报告保存为 Markdown 文件：
+
+**通用方法（JavaScript/Node.js，推荐）**：
+```javascript
+// 生成时间戳
+const timestamp = new Date().toISOString()
+  .replace(/[:.]/g, '-')
+  .replace('T', '_')
+  .slice(0, 19); // YYYY-MM-DD_HH-MM-SS
+
+// 保存汇总报告
+const fs = require('fs');
+fs.writeFileSync(`webofscience_summary_${timestamp}.md`, summaryReport);
+```
+
+**macOS/Linux 系统**：
 ```bash
 echo "$summaryReport" > "webofscience_summary_$(date +%Y%m%d_%H%M%S).md"
+```
+
+**Windows 系统**：
+```batch
+:: 保存汇总报告
+echo %summaryReport% > "webofscience_summary_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.md"
+```
+
+**PowerShell（Windows）**：
+```powershell
+$summaryReport | Out-File -FilePath "webofscience_summary_$(Get-Date -Format 'yyyyMMdd_HHmmss').md"
 ```
 
 ## 注意事项
@@ -996,3 +1093,120 @@ echo "$summaryReport" > "webofscience_summary_$(date +%Y%m%d_%H%M%S).md"
 4. **作者合作网络**：分析作者合作关系和影响力
 
 **重要提示**：使用本 skill 进行学术研究时，请遵守学术伦理和版权规定，合理使用检索结果。
+
+## 跨平台兼容性指南
+
+为确保本技能在不同操作系统上都能正常工作，以下是关键命令的跨平台版本总结：
+
+### 1. 初始化 web-access（关键修改）
+
+| 平台 | 推荐方法 | 说明 |
+|------|----------|------|
+| **所有平台** | `node "$(claude-plugin-path web-access)/scripts/check-deps.mjs"` | 使用 Claude Code 内置插件路径解析 |
+| **Windows** | `node "%CLAUDE_PLUGINS_CACHE%/web-access/web-access/current/scripts/check-deps.mjs"` | 使用环境变量 |
+| **macOS/Linux** | `node "$HOME/.claude/plugins/cache/web-access/web-access/current/scripts/check-deps.mjs"` | 使用家目录路径 |
+| **项目内** | `node "../web-access/scripts/check-deps.mjs"` | 相对路径方式 |
+
+**替换原则**：
+- 避免硬编码如 `C:/Users/15815/.claude/plugins/cache/web-access/web-access/2.4.2/` 的路径
+- 使用环境变量或 Claude Code 内置路径解析功能
+- 优先使用相对路径（如果项目结构允许）
+
+### 2. 文件保存命令（跨平台兼容）
+
+#### 通用方法（JavaScript/Node.js - 推荐）
+```javascript
+const fs = require('fs');
+const timestamp = new Date().toISOString()
+  .replace(/[:.]/g, '-')
+  .replace('T', '_')
+  .slice(0, 19);
+
+fs.writeFileSync(`webofscience_results_${timestamp}.csv`, csvContent);
+```
+
+#### 系统特定方法对比
+
+| 任务 | macOS/Linux (Bash) | Windows (CMD) | Windows (PowerShell) |
+|------|-------------------|---------------|----------------------|
+| 保存 CSV | `echo "$csvContent" > "file_$(date +%Y%m%d_%H%M%S).csv"` | `echo %csvContent% > "file_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.csv"` | `$csvContent \| Out-File -FilePath "file_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"` |
+| 保存 JSON | `echo "$jsonContent" > "file_$(date +%Y%m%d_%H%M%S).json"` | `echo %jsonContent% > "file_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.json"` | `$jsonContent \| Out-File -FilePath "file_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"` |
+| 保存 Markdown | `echo "$summary" > "file_$(date +%Y%m%d_%H%M%S).md"` | `echo %summary% > "file_%DATE:~0,4%%DATE:~5,2%%DATE:~8,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.md"` | `$summary \| Out-File -FilePath "file_$(Get-Date -Format 'yyyyMMdd_HHmmss').md"` |
+
+### 3. 时间戳生成方法
+
+| 方法 | 示例输出 | 适用平台 |
+|------|----------|----------|
+| **JavaScript** | `2025-04-20_15-30-25` | 所有平台（推荐） |
+| **Bash** | `20250420_153025` | macOS/Linux |
+| **PowerShell** | `20250420_153025` | Windows |
+| **CMD** | `20250420_153025` | Windows（需调整时间格式） |
+
+### 4. 路径分隔符注意事项
+
+| 平台 | 路径分隔符 | 环境变量格式 | 示例 |
+|------|-----------|-------------|------|
+| **Windows** | `\` 或 `/` | `%VARIABLE%` | `C:\Users\%USERNAME%\Desktop` |
+| **macOS/Linux** | `/` | `$VARIABLE` 或 `${VARIABLE}` | `/home/$USER/Documents` |
+
+**最佳实践**：
+1. 在路径中使用 `/`（Windows也支持）
+2. 避免硬编码用户名（如 `15815`）
+3. 使用环境变量：`%USERNAME%`（Windows）或 `$USER`（macOS/Linux）
+
+### 5. 环境变量参考
+
+| 变量 | Windows | macOS/Linux | 用途 |
+|------|---------|-------------|------|
+| 用户主目录 | `%USERPROFILE%` 或 `%HOMEPATH%` | `$HOME` | 用户家目录路径 |
+| 用户名 | `%USERNAME%` | `$USER` | 当前用户名 |
+| Claude插件缓存 | `%CLAUDE_PLUGINS_CACHE%` | `$CLAUDE_PLUGINS_CACHE` | Claude插件安装路径 |
+| 临时目录 | `%TEMP%` 或 `%TMP%` | `$TMPDIR` 或 `/tmp` | 临时文件存储 |
+
+### 6. 脚本编写建议
+
+1. **优先使用JavaScript/Node.js**：具有最佳的跨平台兼容性
+2. **避免系统特定命令**：如 `date +%Y%m%d_%H%M%S`（仅Bash）或 `Get-Date`（仅PowerShell）
+3. **路径标准化**：使用 `path.join()`（Node.js）或 `/` 分隔符
+4. **错误处理**：检查文件是否存在、权限等
+
+### 7. 验证脚本跨平台性的方法
+
+```javascript
+// 示例：跨平台文件保存函数
+function saveCrossPlatform(filename, content) {
+  const fs = require('fs');
+  const path = require('path');
+  
+  // 生成安全文件名（跨平台）
+  const timestamp = new Date().toISOString()
+    .replace(/[:.]/g, '-')
+    .replace('T', '_')
+    .slice(0, 19);
+  
+  const safeFilename = `${filename}_${timestamp}`;
+  
+  try {
+    fs.writeFileSync(safeFilename, content);
+    console.log(`文件已保存: ${safeFilename}`);
+    return safeFilename;
+  } catch (error) {
+    console.error(`保存文件失败: ${error.message}`);
+    return null;
+  }
+}
+
+// 使用示例
+const csvContent = "标题,作者,年份\nTest,Author,2023";
+saveCrossPlatform("webofscience_results", csvContent);
+```
+
+### 8. 故障排除
+
+**常见问题**：
+1. **路径不存在**：检查环境变量是否正确设置
+2. **权限错误**：确保对目标目录有写入权限
+3. **命令未找到**：验证 Node.js 是否已安装并添加到 PATH
+4. **编码问题**：保存文件时指定 UTF-8 编码
+
+通过遵循上述指南，您可以确保本 Web of Science 检索工具在 Windows、macOS 和 Linux 系统上都能正常运行。
