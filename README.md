@@ -190,6 +190,9 @@ data-analysis
 3. **学术伦理**：使用 `webofscience-literature-search` 时遵守学术数据库使用规范
 4. **数据隐私**：`literature-review-economics` 依赖 Zotero 本地数据库，确保数据安全
 
+## 📙 问题反馈
+目前项目主要由[某个不想干体力活的Ph D Student](https://github.com/linhuanheng)开发，只是位稍微懂一丢丢代码的金融学博士。很多都是摸着石头过河，感谢愿意把宝贵的token用在我开发的skills上，若有什么问题。可以让AI生成完整详细的执行记录并保存下来后在Issues上留言！感谢各位支持！
+
 ## 📚 相关资源
 
 - [Claude Code 官方文档](https://claude.com/claude-code)
