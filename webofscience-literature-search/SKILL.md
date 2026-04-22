@@ -21,8 +21,34 @@ description: 指导 AI 使用 web-access 在 Web of Science 平台进行专业�
 - **禁止硬编码端口**：使用 `${CDP_PROXY_PORT:-3457}` 获取端口号
 
 ### 3. 脚本文件调用
-- 所有 JS 脚本位于 `scripts/` 目录
-- 使用 `--data-raw "$(cat scripts/filename.js)"` 方式调用
+- 所有 JS 脚本位于 skill 目录下的 `scripts/` 子目录
+- **必须在每个 Bash 脚本开头设置 `SKILL_DIR` 变量**，指向 skill 的绝对路径，后续所有脚本引用均基于此变量
+- 使用 `--data-raw "$(cat $SKILL_DIR/scripts/filename.js")"` 方式调用（**必须用双引号**，确保 `$SKILL_DIR` 变量展开）
+
+**路径设置规则**（每个 Bash 调用的第一行）：
+```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
+```
+
+**错误示例**（禁止使用）：
+```bash
+# ❌ 单引号：变量不展开，cat 报错 No such file or directory
+$(cat '$SKILL_DIR/scripts/scroll-to-render.js')
+# ❌ 相对路径：CWD 是项目目录而非 skill 目录，找不到脚本
+$(cat scripts/scroll-to-render.js)
+# ❌ 硬编码绝对路径：换环境即失效
+$(cat 'C:/Users/15815/.claude/skills/.../scripts/scroll-to-render.js')
+```
+
+**正确示例**：
+```bash
+# ✅ 在 --data-raw "..." 内：$() 替换中不加引号（外层已有双引号，变量可以展开）
+--data-raw "$(cat $SKILL_DIR/scripts/scroll-to-render.js)"
+# ✅ 需要传参时：JS 函数体 + 单引号参数（防止 shell 注入）
+--data-raw "($(cat $SKILL_DIR/scripts/input-search-query.js))('${INPUT_SELECTOR}', '${SEARCH_QUERY}')"
+# ✅ 在独立赋值中：使用双引号包裹含空格的路径
+INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '...')
+```
 
 ### 4. 结果保存
 - **保存位置**：项目目录下的 `SEARCH_RESULTS/` 文件夹
@@ -119,11 +145,62 @@ description: 指导 AI 使用 web-access 在 Web of Science 平台进行专业�
 - `YYYY TO YYYY`：Web of Science 格式（如 `2018 TO 2024`）
 - `YYYY`：单一年份（如 `2024`）
 
+### 自动化流水线（推荐方式）
+
+**第零步确认检索参数后，直接调用 `run-search.sh` 一次性完成步骤 1-5，无需中间交互。**
+
+脚本内部自动完成：初始化页面 → 查找交互元素 → 构建检索式 → 输入检索式 → 点击搜索 → 等待结果 → 滚动渲染 → 提取文献 → 失败重试 → 多页翻页 → 合并数据 → 生成报告。
+
+```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
+
+# 构建关键词参数（WoS 检索语法）
+# 关键词之间用 AND/OR 连接，整个词组用引号包裹
+SEARCH_KEYWORDS='"liquidity" AND "asset pricing"'
+
+# 期刊范围（逗号分隔期刊全称，空字符串=不限制）
+JOURNAL_SCOPE="Journal of Finance,Journal of Financial Economics,Review of Financial Studies,Journal of Financial and Quantitative Analysis,Review of Finance"
+
+# 时间范围
+YEAR_RANGE="2021-2026"
+
+# 检索主题（用于文件命名，中文或英文）
+SEARCH_TOPIC="liquidity and asset pricing"
+
+# 执行自动化流水线（单条命令，无需后续干预）
+bash "$SKILL_DIR/scripts/run-search.sh" "$SEARCH_KEYWORDS" "$JOURNAL_SCOPE" "$YEAR_RANGE" "$SEARCH_TOPIC"
+```
+
+**参数说明**：
+
+| 参数 | 位置 | 说明 | 示例 |
+|------|------|------|------|
+| SEARCH_KEYWORDS | $1 | WoS 检索关键词（含逻辑运算符） | `'"liquidity" AND "asset pricing"'` |
+| JOURNAL_SCOPE | $2 | 期刊全称（逗号分隔，空=不限） | `"Journal of Finance,Journal of Financial Economics"` |
+| YEAR_RANGE | $3 | 发表年份范围 | `"2021-2026"` 或 `"recent-5-years"` |
+| SEARCH_TOPIC | $4 | 检索主题（用于输出文件命名） | `"liquidity and asset pricing"` |
+
+**输出文件**：
+- JSON：`SEARCH_RESULTS/[topic]_[timestamp].json`
+- Markdown：`SEARCH_RESULTS/[topic]_[timestamp].md`
+- 失败记录：`SEARCH_RESULTS/[topic]_failure_[timestamp].md`
+
+**执行后**：读取生成的 Markdown 报告，向用户展示检索结果摘要。
+
+---
+
+### 手动分步执行（备用方式）
+
+以下步骤仅在 `run-search.sh` 失败需要调试，或需要更精细控制时使用。正常情况下应优先使用自动化流水线。
+
 ### 第一步：初始化并打开页面
 
 ```bash
+# 0. Set skill directory (REQUIRED: must be first line in every bash call)
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
+
 # 1. Check web-access status
-bash scripts/check-env.sh
+bash "$SKILL_DIR/scripts/check-env.sh"
 
 # 2. Get port and open WoS advanced search
 PORT="${CDP_PROXY_PORT:-3457}"
@@ -136,23 +213,23 @@ sleep 5
 #    Results saved as interactive-elements.json, later scripts read selectors from this file
 echo "Finding interactive elements..."
 INTERACTIVE_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "$(cat scripts/find-interactive-elements.js)")
+  --data-raw "$(cat $SKILL_DIR/scripts/find-interactive-elements.js)")
 
 echo "Interactive elements result: $INTERACTIVE_RESULT"
 
 # Save as JSON file
-echo "$INTERACTIVE_RESULT" | node scripts/json-helper.mjs save-pretty scripts/interactive-elements.json
-echo "Interactive elements saved to scripts/interactive-elements.json"
+echo "$INTERACTIVE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" save-pretty "$SKILL_DIR/scripts/interactive-elements.json"
+echo "Interactive elements saved to $SKILL_DIR/scripts/interactive-elements.json"
 
 # Verify key elements are ready
-READY=$(echo "$INTERACTIVE_RESULT" | node scripts/json-helper.mjs read-stdin '.elementStatus.ready // false')
-HAS_INPUT=$(echo "$INTERACTIVE_RESULT" | node scripts/json-helper.mjs read-stdin '.elementStatus.hasSearchInput // false')
-HAS_BUTTON=$(echo "$INTERACTIVE_RESULT" | node scripts/json-helper.mjs read-stdin '.elementStatus.hasSearchButton // false')
+READY=$(echo "$INTERACTIVE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.elementStatus.ready // false')
+HAS_INPUT=$(echo "$INTERACTIVE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.elementStatus.hasSearchInput // false')
+HAS_BUTTON=$(echo "$INTERACTIVE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.elementStatus.hasSearchButton // false')
 echo "Ready: $READY (input: $HAS_INPUT, button: $HAS_BUTTON)"
 
 # Extract selectors from JSON file for later steps
-INPUT_SELECTOR=$(node scripts/json-helper.mjs read scripts/interactive-elements.json '.targetElements.searchInput.selector // ""')
-BUTTON_SELECTOR=$(node scripts/json-helper.mjs read scripts/interactive-elements.json '.targetElements.searchButton.selector // ""')
+INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '.targetElements.searchInput.selector // ""')
+BUTTON_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '.targetElements.searchButton.selector // ""')
 echo "Input selector: $INPUT_SELECTOR"
 echo "Button selector: $BUTTON_SELECTOR"
 
@@ -160,11 +237,11 @@ if [ "$READY" != "true" ]; then
   echo "Warning: elements not ready, retrying..."
   sleep 5
   INTERACTIVE_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-    --data-raw "$(cat scripts/find-interactive-elements.js)")
-  echo "$INTERACTIVE_RESULT" | node scripts/json-helper.mjs save-pretty scripts/interactive-elements.json
-  READY=$(echo "$INTERACTIVE_RESULT" | node scripts/json-helper.mjs read-stdin '.elementStatus.ready // false')
-  INPUT_SELECTOR=$(node scripts/json-helper.mjs read scripts/interactive-elements.json '.targetElements.searchInput.selector // ""')
-  BUTTON_SELECTOR=$(node scripts/json-helper.mjs read scripts/interactive-elements.json '.targetElements.searchButton.selector // ""')
+    --data-raw "$(cat $SKILL_DIR/scripts/find-interactive-elements.js)")
+  echo "$INTERACTIVE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" save-pretty "$SKILL_DIR/scripts/interactive-elements.json"
+  READY=$(echo "$INTERACTIVE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.elementStatus.ready // false')
+  INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '.targetElements.searchInput.selector // ""')
+  BUTTON_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '.targetElements.searchButton.selector // ""')
   echo "Ready after retry: $READY"
 fi
 ```
@@ -181,10 +258,11 @@ then use document.querySelector(selector) to re-locate DOM elements on the page.
 ### 第二步：输入检索式
 
 ```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
 PORT="${CDP_PROXY_PORT:-3457}"
 
 # 1. Read input selector from interactive-elements.json
-INPUT_SELECTOR=$(node scripts/json-helper.mjs read scripts/interactive-elements.json '.targetElements.searchInput.selector // ""')
+INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '.targetElements.searchInput.selector // ""')
 
 if [ -z "$INPUT_SELECTOR" ]; then
   echo "Error: no input selector in interactive-elements.json, re-run step 1"
@@ -231,16 +309,16 @@ echo "Final query: $SEARCH_QUERY"
 # 3. Input search query (pass inputSelector and query)
 echo "Inputting search query..."
 INPUT_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "($(cat scripts/input-search-query.js))('${INPUT_SELECTOR}', '${SEARCH_QUERY}')")
+  --data-raw "($(cat $SKILL_DIR/scripts/input-search-query.js))('${INPUT_SELECTOR}', '${SEARCH_QUERY}')")
 
 echo "Input result: $INPUT_RESULT"
 
-INPUT_SUCCESS=$(echo "$INPUT_RESULT" | node scripts/json-helper.mjs read-stdin '.success // false')
-INPUT_VERIFIED=$(echo "$INPUT_RESULT" | node scripts/json-helper.mjs read-stdin '.inputVerified // false')
+INPUT_SUCCESS=$(echo "$INPUT_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.success // false')
+INPUT_VERIFIED=$(echo "$INPUT_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.inputVerified // false')
 
 if [ "$INPUT_SUCCESS" != "true" ]; then
   echo "Error: search query input failed"
-  ERROR_MSG=$(echo "$INPUT_RESULT" | node scripts/json-helper.mjs read-stdin '.error // "unknown error"')
+  ERROR_MSG=$(echo "$INPUT_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.error // "unknown error"')
   echo "Error: $ERROR_MSG"
 fi
 
@@ -250,11 +328,12 @@ echo "Input verified: $INPUT_VERIFIED"
 ### 第三步：点击搜索按钮
 
 ```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
 PORT="${CDP_PROXY_PORT:-3457}"
 
 # 1. Read selectors from interactive-elements.json
-INPUT_SELECTOR=$(node scripts/json-helper.mjs read scripts/interactive-elements.json '.targetElements.searchInput.selector // ""')
-BUTTON_SELECTOR=$(node scripts/json-helper.mjs read scripts/interactive-elements.json '.targetElements.searchButton.selector // ""')
+INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '.targetElements.searchInput.selector // ""')
+BUTTON_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '.targetElements.searchButton.selector // ""')
 
 if [ -z "$BUTTON_SELECTOR" ]; then
   echo "Error: no button selector in interactive-elements.json, re-run step 1"
@@ -264,14 +343,14 @@ fi
 # 2. Click search button (pass inputSelector and buttonSelector)
 echo "Clicking search button..."
 CLICK_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "($(cat scripts/click-search-button.js))('${INPUT_SELECTOR}', '${BUTTON_SELECTOR}')")
+  --data-raw "($(cat $SKILL_DIR/scripts/click-search-button.js))('${INPUT_SELECTOR}', '${BUTTON_SELECTOR}')")
 
 echo "Click result: $CLICK_RESULT"
 
-CLICK_SUCCESS=$(echo "$CLICK_RESULT" | node scripts/json-helper.mjs read-stdin '.success // false')
+CLICK_SUCCESS=$(echo "$CLICK_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.success // false')
 if [ "$CLICK_SUCCESS" != "true" ]; then
   echo "Error: search button click failed"
-  ERROR_MSG=$(echo "$CLICK_RESULT" | node scripts/json-helper.mjs read-stdin '.error // "unknown error"')
+  ERROR_MSG=$(echo "$CLICK_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.error // "unknown error"')
   echo "Error: $ERROR_MSG"
 fi
 
@@ -281,7 +360,7 @@ PAGE_LOADED=false
 for i in {1..10}; do
   sleep 3
   PAGE_STATUS=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-    --data-raw "$(cat scripts/check-page-ready.js)")
+    --data-raw "$(cat $SKILL_DIR/scripts/check-page-ready.js)")
   echo "Waited $((i*3))s - page status: $(echo "$PAGE_STATUS" | tr '\n' ' ')"
 
   # Check if on results page
@@ -302,7 +381,7 @@ done
 # 5. Diagnose page status
 echo "Diagnosing page..."
 DIAGNOSE_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "$(cat scripts/diagnose-page.js)")
+  --data-raw "$(cat $SKILL_DIR/scripts/diagnose-page.js)")
 echo "Page diagnosis: $DIAGNOSE_RESULT"
 
 # 6. Adaptive scroll to render all records (WoS virtual scrolling)
@@ -314,8 +393,8 @@ for scroll_round in {1..10}; do
   offset=0
   while true; do
     SCROLL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-      --data-raw "($(cat scripts/scroll-to-render.js))($offset)")
-    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node scripts/json-helper.mjs read-stdin '.scrollHeight // 0')
+      --data-raw "($(cat $SKILL_DIR/scripts/scroll-to-render.js))($offset)")
+    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.scrollHeight // 0')
     if [ "$offset" -ge "$CURR_HEIGHT" ]; then break; fi
     offset=$((offset + 500))
   done
@@ -330,7 +409,7 @@ done
 
 echo "Extracting results..."
 EXTRACT_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "$(cat scripts/extract-papers-v2.js)")
+  --data-raw "$(cat $SKILL_DIR/scripts/extract-papers-v2.js)")
 echo "Extract result: $EXTRACT_RESULT"
 ```
 
@@ -342,36 +421,37 @@ echo "Extract result: $EXTRACT_RESULT"
 
 **尝试 2 - 刷新页面后重试**：
 ```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
 curl -s "http://localhost:$PORT/navigate?target=TARGET_ID&url=https://webofscience.clarivate.cn/wos/alldb/advanced-search"
 sleep 3
 
 # Re-find interactive elements (needed after page refresh)
 echo "Re-finding interactive elements..."
 INTERACTIVE_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "$(cat scripts/find-interactive-elements.js)")
+  --data-raw "$(cat $SKILL_DIR/scripts/find-interactive-elements.js)")
 
-echo "$INTERACTIVE_RESULT" | node scripts/json-helper.mjs save-pretty scripts/interactive-elements.json
-READY=$(echo "$INTERACTIVE_RESULT" | node scripts/json-helper.mjs read-stdin '.elementStatus.ready // false')
+echo "$INTERACTIVE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" save-pretty "$SKILL_DIR/scripts/interactive-elements.json"
+READY=$(echo "$INTERACTIVE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.elementStatus.ready // false')
 if [ "$READY" != "true" ]; then
   echo "Page not fully loaded, waiting..."
   sleep 5
   INTERACTIVE_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-    --data-raw "$(cat scripts/find-interactive-elements.js)")
-  echo "$INTERACTIVE_RESULT" | node scripts/json-helper.mjs save-pretty scripts/interactive-elements.json
+    --data-raw "$(cat $SKILL_DIR/scripts/find-interactive-elements.js)")
+  echo "$INTERACTIVE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" save-pretty "$SKILL_DIR/scripts/interactive-elements.json"
 fi
 
 # Read selectors from updated JSON file
-INPUT_SELECTOR=$(node scripts/json-helper.mjs read scripts/interactive-elements.json '.targetElements.searchInput.selector // ""')
-BUTTON_SELECTOR=$(node scripts/json-helper.mjs read scripts/interactive-elements.json '.targetElements.searchButton.selector // ""')
+INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '.targetElements.searchInput.selector // ""')
+BUTTON_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scripts/interactive-elements.json" '.targetElements.searchButton.selector // ""')
 
 # Re-input search query
 INPUT_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "($(cat scripts/input-search-query.js))('${INPUT_SELECTOR}', '${SEARCH_QUERY}')")
+  --data-raw "($(cat $SKILL_DIR/scripts/input-search-query.js))('${INPUT_SELECTOR}', '${SEARCH_QUERY}')")
 echo "Retry input result: $INPUT_RESULT"
 
 # Re-click search button
 CLICK_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "($(cat scripts/click-search-button.js))('${INPUT_SELECTOR}', '${BUTTON_SELECTOR}')")
+  --data-raw "($(cat $SKILL_DIR/scripts/click-search-button.js))('${INPUT_SELECTOR}', '${BUTTON_SELECTOR}')")
 echo "Retry click result: $CLICK_RESULT"
 
 # Wait for page redirect
@@ -383,8 +463,8 @@ for scroll_round in {1..10}; do
   offset=0
   while true; do
     SCROLL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-      --data-raw "($(cat scripts/scroll-to-render.js))($offset)")
-    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node scripts/json-helper.mjs read-stdin '.scrollHeight // 0')
+      --data-raw "($(cat $SKILL_DIR/scripts/scroll-to-render.js))($offset)")
+    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.scrollHeight // 0')
     if [ "$offset" -ge "$CURR_HEIGHT" ]; then break; fi
     offset=$((offset + 500))
   done
@@ -394,14 +474,15 @@ for scroll_round in {1..10}; do
 done
 
 EXTRACT_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "$(cat scripts/extract-papers-v2.js)")
+  --data-raw "$(cat $SKILL_DIR/scripts/extract-papers-v2.js)")
 echo "Retry extract result: $EXTRACT_RESULT"
 ```
 
 **尝试 3 - 直接访问结果页**：
 ```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
 # Build result page URL (with dynamic query)
-QUERY_FOR_URL=$(echo "${SEARCH_QUERY}" | node scripts/json-helper.mjs url-encode)
+QUERY_FOR_URL=$(echo "${SEARCH_QUERY}" | node "$SKILL_DIR/scripts/json-helper.mjs" url-encode)
 curl -s "http://localhost:$PORT/navigate?target=TARGET_ID&url=https://webofscience.clarivate.cn/wos/alldb/result?count=50&Q=$QUERY_FOR_URL"
 sleep 5
 
@@ -411,8 +492,8 @@ for scroll_round in {1..10}; do
   offset=0
   while true; do
     SCROLL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-      --data-raw "($(cat scripts/scroll-to-render.js))($offset)")
-    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node scripts/json-helper.mjs read-stdin '.scrollHeight // 0')
+      --data-raw "($(cat $SKILL_DIR/scripts/scroll-to-render.js))($offset)")
+    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.scrollHeight // 0')
     if [ "$offset" -ge "$CURR_HEIGHT" ]; then break; fi
     offset=$((offset + 500))
   done
@@ -423,7 +504,7 @@ done
 
 # Extract results
 curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "$(cat scripts/extract-papers-v2.js)"
+  --data-raw "$(cat $SKILL_DIR/scripts/extract-papers-v2.js)"
 ```
 
 ### 第五步：成功 - 多页数据提取
@@ -433,6 +514,7 @@ curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
 **重要说明**：WoS 使用虚拟滚动（virtual scrolling），只渲染视口内可见的 DOM 元素。**直接 `scrollTo(0, height)` 跳到底部会跳过中间记录，导致虚拟滚动不渲染被跳过的部分**（测试中50篇仅提取6篇）。必须使用 `scroll-to-render.js` 增量步进滚动（每次+500px），逐步触发虚拟滚动渲染，然后多轮检测页面高度是否稳定。固定偏移量 `for offset in ...` 和 `scroll-to-bottom.js` 均已弃用。此外，翻页检查和点击必须分开执行，避免 `next-page.js` 检查时同时点击导致页面跳跃。
 
 ```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
 # Results directory (under project root)
 RESULTS_DIR="SEARCH_RESULTS"
 TEMP_DIR="${RESULTS_DIR}/temp_pages_$$"
@@ -461,7 +543,7 @@ while [ "$PAGE_NUMBER" -le "$MAX_PAGES" ]; do
   for wait_i in {1..5}; do
     sleep 3
     PAGE_STATUS=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-      --data-raw "$(cat scripts/check-page-ready.js)")
+      --data-raw "$(cat $SKILL_DIR/scripts/check-page-ready.js)")
     if echo "$PAGE_STATUS" | grep -q '"ready":true'; then
       PAGE_READY=true
       break
@@ -483,8 +565,8 @@ while [ "$PAGE_NUMBER" -le "$MAX_PAGES" ]; do
     offset=0
     while true; do
       SCROLL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-        --data-raw "($(cat scripts/scroll-to-render.js))($offset)")
-      CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node scripts/json-helper.mjs read-stdin '.scrollHeight // 0')
+        --data-raw "($(cat $SKILL_DIR/scripts/scroll-to-render.js))($offset)")
+      CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.scrollHeight // 0')
       if [ "$offset" -ge "$CURR_HEIGHT" ]; then break; fi
       offset=$((offset + 500))
     done
@@ -499,25 +581,25 @@ while [ "$PAGE_NUMBER" -le "$MAX_PAGES" ]; do
 
   # 3. Expand all abstracts on current page (click Show more)
   SHOW_MORE_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-    --data-raw "$(cat scripts/click-show-more.js)")
-  SHOW_MORE_CLICKED=$(echo "$SHOW_MORE_RESULT" | node scripts/json-helper.mjs read-stdin '.clickedCount // 0')
+    --data-raw "$(cat $SKILL_DIR/scripts/click-show-more.js)")
+  SHOW_MORE_CLICKED=$(echo "$SHOW_MORE_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.clickedCount // 0')
   echo "Expanded abstracts: $SHOW_MORE_CLICKED"
 
   # 4. Extract papers on current page
   EXTRACT_JSON=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-    --data-raw "$(cat scripts/extract-papers-v2.js)")
+    --data-raw "$(cat $SKILL_DIR/scripts/extract-papers-v2.js)")
 
-  PAGE_PAPERS=$(echo "$EXTRACT_JSON" | node scripts/json-helper.mjs extract-field-stdin '.papers // []')
-  PAGE_COUNT=$(echo "$PAGE_PAPERS" | node scripts/json-helper.mjs length-stdin)
-  EXTRACT_SUCCESS=$(echo "$EXTRACT_JSON" | node scripts/json-helper.mjs read-stdin '.success // "true"')
+  PAGE_PAPERS=$(echo "$EXTRACT_JSON" | node "$SKILL_DIR/scripts/json-helper.mjs" extract-field-stdin '.papers // []')
+  PAGE_COUNT=$(echo "$PAGE_PAPERS" | node "$SKILL_DIR/scripts/json-helper.mjs" length-stdin)
+  EXTRACT_SUCCESS=$(echo "$EXTRACT_JSON" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.success // "true"')
 
   echo "Page ${PAGE_NUMBER}: extracted $PAGE_COUNT papers"
 
   if [ "$EXTRACT_SUCCESS" = "true" ] && [ "$PAGE_COUNT" -gt 0 ]; then
     # Extract success: tag page number and save to temp file immediately
     CONSECUTIVE_EMPTY=0
-    PAGE_PAPERS_TAGGED=$(echo "$PAGE_PAPERS" | node scripts/json-helper.mjs add-page-number "$PAGE_NUMBER")
-    echo "$PAGE_PAPERS_TAGGED" | node scripts/json-helper.mjs save-pretty "${TEMP_DIR}/page_$(printf '%03d' $PAGE_NUMBER).json"
+    PAGE_PAPERS_TAGGED=$(echo "$PAGE_PAPERS" | node "$SKILL_DIR/scripts/json-helper.mjs" add-page-number "$PAGE_NUMBER")
+    echo "$PAGE_PAPERS_TAGGED" | node "$SKILL_DIR/scripts/json-helper.mjs" save-pretty "${TEMP_DIR}/page_$(printf '%03d' $PAGE_NUMBER).json"
     echo "Saved page ${PAGE_NUMBER} to temp file"
   else
     # Extract failed or empty page
@@ -536,7 +618,7 @@ while [ "$PAGE_NUMBER" -le "$MAX_PAGES" ]; do
       if (!nextBtn) return false;
       return !nextBtn.disabled;
     })()")
-  HAS_NEXT_VAL=$(echo "$HAS_NEXT" | node scripts/json-helper.mjs read-stdin '.')
+  HAS_NEXT_VAL=$(echo "$HAS_NEXT" | node "$SKILL_DIR/scripts/json-helper.mjs" read-stdin '.')
 
   if [ "$HAS_NEXT_VAL" != "true" ]; then
     echo "No more pages"
@@ -560,7 +642,7 @@ echo "=== Multi-page extraction complete ==="
 echo "Page files in: $TEMP_DIR"
 
 # 7. Merge all temp page files into final JSON and save
-node scripts/json-helper.mjs build-final-from-pages "$TEMP_DIR" \
+node "$SKILL_DIR/scripts/json-helper.mjs" build-final-from-pages "$TEMP_DIR" \
   --query "${SEARCH_QUERY}" \
   --topic "${SEARCH_TOPIC}" \
   --journal "${JOURNAL_SCOPE}" \
@@ -657,8 +739,8 @@ echo "Keywords: ${SEARCH_KEYWORDS}"
 echo "Year range: ${YEAR_RANGE:-recent-5-years}"
 echo "Journal scope: ${JOURNAL_SCOPE:-all}"
 # Read total from final JSON
-TOTAL_PAPERS=$(node scripts/json-helper.mjs read "${RESULTS_DIR}/${TOPIC_SLUG}_${TIMESTAMP}.json" '.totalPapers // 0')
-TOTAL_PAGES=$(node scripts/json-helper.mjs read "${RESULTS_DIR}/${TOPIC_SLUG}_${TIMESTAMP}.json" '.totalPages // 0')
+TOTAL_PAPERS=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "${RESULTS_DIR}/${TOPIC_SLUG}_${TIMESTAMP}.json" '.totalPapers // 0')
+TOTAL_PAGES=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "${RESULTS_DIR}/${TOPIC_SLUG}_${TIMESTAMP}.json" '.totalPages // 0')
 echo "Total pages: $TOTAL_PAGES"
 echo "Total papers: $TOTAL_PAPERS"
 echo "Result files:"
@@ -683,15 +765,16 @@ echo "  - Markdown: ${RESULTS_DIR}/${TOPIC_SLUG}_${TIMESTAMP}.md"
 在检索结果页面，可以点击任意文献标题在新标签页打开详细信息，并提取摘要等关键字段。
 
 ```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
 # 1. List papers on current page, confirm index
 EXTRACT_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "$(cat scripts/extract-papers-v2.js)")
+  --data-raw "$(cat $SKILL_DIR/scripts/extract-papers-v2.js)")
 echo "$EXTRACT_RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const o=JSON.parse(d);const s={totalPapers:o.totalPapers,papers:o.papers.slice(0,3).map(p=>({index:p.index,title:p.title,year:p.year,journal:p.journal}))};console.log(JSON.stringify(s,null,2))})"
 
 # 2. Open paper detail page in new tab
 # Parameter: paperIndex (1-based, default 1)
 OPEN_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-  --data-raw "(function(){ return $(cat scripts/open-paper-detail.js)(3); })()")
+  --data-raw "(function(){ return $(cat $SKILL_DIR/scripts/open-paper-detail.js)(3); })()")
 echo "Open detail page: $OPEN_RESULT"
 
 # 3. Wait for new tab to load
@@ -707,11 +790,11 @@ sleep 3
 
 # 6. Extract detail page info (abstract, year, journal, keywords, DOI, etc.)
 DETAIL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=2" \
-  --data-raw "$(cat scripts/extract-detail.js)")
+  --data-raw "$(cat $SKILL_DIR/scripts/extract-detail.js)")
 echo "Paper detail: $DETAIL_RESULT"
 
 # 7. Save detail to file
-echo "$DETAIL_RESULT" | node scripts/json-helper.mjs save-pretty "${RESULTS_DIR}/paper_detail_${TIMESTAMP}.json"
+echo "$DETAIL_RESULT" | node "$SKILL_DIR/scripts/json-helper.mjs" save-pretty "${RESULTS_DIR}/paper_detail_${TIMESTAMP}.json"
 echo "Detail saved: ${RESULTS_DIR}/paper_detail_${TIMESTAMP}.json"
 ```
 
@@ -830,6 +913,7 @@ echo "Failure record saved: ${RESULTS_DIR}/${TOPIC_SLUG}_failure_${TIMESTAMP}.md
 | `generate-markdown-report.js` | 从 JSON 生成 Markdown 报告 |
 | `check-data-quality.js` | 数据质量检查 |
 | `check-env.sh` | 环境检测和路径查找 |
+| `run-search.sh` | **自动化流水线**：一步完成步骤 1-5（初始化→输入→搜索→提取→翻页→报告），无需中间交互 |
 | `diagnose-page.js` | 页面诊断 |
 | `json-helper.mjs` | Node.js JSON 处理工具，替代 jq（读取字段、美化保存、URL编码、数组操作、页面文件合并等） |
 
@@ -886,10 +970,18 @@ json-helper.mjs build-final-from-pages（合并所有 page_NNN.json）→ 保存
 ```
 
 ---
-*版本：3.5（自适应滚动修复版）*
+*版本：3.6（SKILL_DIR 绝对路径修复版）*
 *更新日期：2026-04-22*
 
 ## 修复日志
+
+### v3.6 (2026-04-22) - SKILL_DIR 绝对路径修复版
+- **核心修复：统一使用 SKILL_DIR 绝对路径变量**：原 SKILL.md 中所有脚本引用使用相对路径 `scripts/xxx.js`，但 Claude Code 的 Bash 工具 CWD 是项目目录而非 skill 目录，导致 `cat scripts/xxx.js` 找不到文件。改为在每个 bash 代码块开头声明 `SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"`，所有脚本引用改为 `$SKILL_DIR/scripts/xxx.js`
+- **核心修复：Shell 引号规则**：`--data-raw "..."` 内部的 `$(cat ...)` 不加额外双引号（外层已有双引号，变量可正常展开），独立 `node` 命令的路径参数使用双引号包裹
+- **新增路径设置规则**：核心原则第 3 节增加详细的路径设置规则、错误示例（单引号、相对路径、硬编码绝对路径）和正确示例
+- **新增自动化流水线脚本**：`run-search.sh` 将步骤 1-5 合并为单次 bash 调用，所有变量在同一 shell 进程内传递，无需 AI 在中间步骤读取变量和手动拼接命令
+- **SKILL.md 新增「自动化流水线」章节**：位于手动分步执行之前，推荐 AI 优先使用 `run-search.sh`
+- **影响范围**：全文 25 处 `$(cat scripts/...)` → `$(cat $SKILL_DIR/scripts/...)`，10+ 处 `node scripts/...` → `node "$SKILL_DIR/scripts/..."`，所有 bash 代码块添加 `SKILL_DIR=` 声明
 
 ### v3.5 (2026-04-22) - 自适应滚动修复版
 - **核心修复：增量步进自适应滚动**：WoS 虚拟滚动下直接 `scrollTo(0, height)` 跳到底部会跳过中间记录，虚拟滚动不渲染被跳过的部分（测试中50篇仅提取6篇）。`scroll-to-render.js` 改为接受参数模式：bash 端用 `offset` 变量每次+500px 逐步调用，逐段触发虚拟滚动渲染，然后多轮检测页面高度是否稳定，直到不再增长
