@@ -1,0 +1,886 @@
+{
+  "success": true,
+  "timestamp": "2026-04-22T08:38:00.142Z",
+  "url": "https://webofscience.clarivate.cn/wos/alldb/advanced-search",
+  "title": "Advanced search - All Databases",
+  "interactiveElements": {
+    "links": {
+      "count": 35,
+      "elements": [
+        {
+          "tagName": "A",
+          "text": "Web of Science™",
+          "href": "/wos/",
+          "id": "headerLogo",
+          "className": "cdx-header__product-name-or-logo ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "Smart Search",
+          "href": "/wos/woscc/smart-search",
+          "id": "snHeaderLinkNavigation",
+          "className": "mdc-tab mat-mdc-tab-link mat-mdc-focus-indicator navlink-pad",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "0"
+        },
+        {
+          "tagName": "A",
+          "text": "Advanced Search",
+          "href": "/wos/alldb/basic-search",
+          "id": "snAdvancedLink",
+          "className": "mdc-tab mat-mdc-tab-link mat-mdc-focus-indicator navlink-pad",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "0"
+        },
+        {
+          "tagName": "A",
+          "text": "DOCUMENTS",
+          "href": "/wos/alldb/advanced-search",
+          "id": "search-tab-link-documents",
+          "className": "search-tab-link new-bg-color-link mdc-button mat-mdc-button ",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "RESEARCHERS",
+          "href": "/wos/author/author-search",
+          "id": "snResearcherSearch",
+          "className": "search-tab-link new-bg-color-link mdc-button mat-mdc-button ",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "FIELDED SEARCH",
+          "href": "/wos/alldb/basic-search",
+          "id": "",
+          "className": "mat-mdc-list-item mdc-list-item mat-mdc-list-item-single-lin",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "QUERY BUILDER",
+          "href": "/wos/alldb/advanced-search",
+          "id": "",
+          "className": "mat-mdc-list-item mdc-list-item mat-mdc-list-item-single-lin",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "CITED REFERENCES",
+          "href": "/wos/alldb/cited-reference-search",
+          "id": "",
+          "className": "mat-mdc-list-item mdc-list-item mat-mdc-list-item-single-lin",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "Search Help",
+          "href": "http://webofscience.zendesk.com/hc/en-us/articles/20130361503249-Advanced-Search-Query-Builder",
+          "id": "",
+          "className": "wos-standard-link-underlined",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "372",
+          "href": "/wos/alldb/summary/d0c7218f-aaf7-4d4d-a77c-ffa665a4a0e1-01aebd9860/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "372",
+          "href": "/wos/alldb/summary/18d962dc-4afa-479c-92ff-f76a757ab45f-01aebd985f/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "372",
+          "href": "/wos/alldb/summary/46bab09e-66c4-4719-9c93-fa7b1147a42a-01aebd9858/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "7,281",
+          "href": "/wos/alldb/summary/8bf6fab0-faf9-4d53-82f8-2d37a52a7994-01aebae505/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "7,281",
+          "href": "/wos/alldb/summary/9567b167-a760-4f5d-a041-6d3b61e2309c-01aebae504/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "7,281",
+          "href": "/wos/alldb/summary/a9c36ba8-2887-4ed1-92d3-a12722fef870-01aebae502/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "2",
+          "href": "/wos/alldb/summary/753909a4-9de0-43dd-8310-cb96394863ad-01aeb1056a/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "11,107",
+          "href": "/wos/alldb/summary/ce1b96a7-efff-4d88-9734-7aed71d96ca1-01aeb1031f/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "",
+          "href": "http://lib.jnu.edu.cn/",
+          "id": "InstLogoTa-0",
+          "className": "",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "",
+          "href": "https://clarivate.com.cn/e-clarivate/wos.htm",
+          "id": "InstLogoTa-1",
+          "className": "",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "Legal Center",
+          "href": "https://clarivate.com/legal-center/",
+          "id": "",
+          "className": "",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        }
+      ]
+    },
+    "buttons": {
+      "count": 73,
+      "elements": [
+        {
+          "tagName": "BUTTON",
+          "text": "expand_more\nSkip navigation menu\nskipToNav",
+          "id": "skip-nav",
+          "className": "mat-mdc-menu-trigger skip-to-nav-link mdc-button mat-mdc-button mat-unthemed mat",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "English",
+          "id": "",
+          "className": "mat-mdc-menu-trigger lang-button no-curve-border mdc-button mat-mdc-button mat-u",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "Language dropdown. English selected",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "apps\nProducts",
+          "id": "",
+          "className": "mat-mdc-menu-trigger no-curve-border mdc-button mat-mdc-button mat-unthemed mat-",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "Web of Science products dropdown",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "Sign In",
+          "id": "",
+          "className": "mat-mdc-menu-trigger wos-sign-in mdc-button mat-mdc-button mat-unthemed mat-mdc-",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "Register",
+          "id": "",
+          "className": "wos-register mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-unt",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "MENU",
+          "id": "",
+          "className": "mat-mdc-tooltip-trigger menu hover-highlight nav-button item-icon",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "",
+          "id": "navigateToMlPage",
+          "className": "mat-mdc-tooltip-trigger left-side-nav-link hover-highlight ng-star-inserted",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-tooltip-trigger left-side-nav-link hover-highlight ng-star-inserted",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-tooltip-trigger left-side-nav-link hover-highlight ng-star-inserted",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "button",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-tooltip-trigger left-side-nav-link hover-highlight ng-star-inserted",
+          "type": "submit",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "All Databases",
+          "id": "",
+          "className": "mat-mdc-tooltip-trigger dropdown mat-mdc-tooltip-disabled ng-star-inserted",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "All Databases",
+          "role": "combobox",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "6 selected",
+          "id": "",
+          "className": "mat-mdc-tooltip-trigger dropdown mat-mdc-tooltip-disabled ng-star-inserted",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "6 selected",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "Topic",
+          "id": "",
+          "className": "mat-mdc-tooltip-trigger dropdown mat-mdc-tooltip-disabled ng-star-inserted",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "Topic",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "And",
+          "id": "",
+          "className": "mat-mdc-tooltip-trigger dropdown mat-mdc-tooltip-disabled ng-star-inserted",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "And",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "Add to query",
+          "id": "",
+          "className": "search mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-primary m",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": true
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "expand_more\nMore options",
+          "id": "",
+          "className": "no-left-padding mdc-button mat-mdc-button mat-unthemed mat-mdc-button-base",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "add\nAdd date range",
+          "id": "",
+          "className": "add-timespan-row mdc-button mdc-button--outlined mat-mdc-outlined-button mat-pri",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "Add date range",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "close\nClear",
+          "id": "",
+          "className": "cdx-but-link clear mdc-button mdc-button--outlined mat-mdc-outlined-button mat-p",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "Clear search query",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "Search",
+          "id": "",
+          "className": "search mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-primary m",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
+          "text": "Examples",
+          "id": "_pendo-badge_HfeE9iajuR83vwJE-5oTyvWr49g",
+          "className": "_pendo-badge _pendo-badge_",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false
+        }
+      ]
+    },
+    "formControls": {
+      "count": 20,
+      "elements": [
+        {
+          "tagName": "INPUT",
+          "type": "text",
+          "id": "search-option-",
+          "name": "search-main-box",
+          "className": "mat-mdc-autocomplete-trigger mat-mdc-input-element ng-tns-c5",
+          "placeholder": "",
+          "value": "",
+          "ariaLabel": "Search box NaN",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "TEXTAREA",
+          "type": "textarea",
+          "id": "advancedSearchInputArea",
+          "name": "search",
+          "className": "search-criteria-input ng-untouched ng-pristine ng-valid",
+          "placeholder": "Enter or edit your query here. You can also combine previous searches e.g. #5 AND #2 ",
+          "value": "TS=(\"volatility\" OR \"asset pricing\" OR \"risk premi",
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-1-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-2-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-10-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-11-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-3-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-4-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-5-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-6-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-7-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-8-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-9-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "ot-group-id-C0003",
+          "name": "ot-group-id-C0003",
+          "className": "category-switch-handler",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "ot-group-id-C0004",
+          "name": "ot-group-id-C0004",
+          "className": "category-switch-handler",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "text",
+          "id": "vendor-search-handler",
+          "name": "vendor-search-handler",
+          "className": "",
+          "placeholder": "Search…",
+          "value": "",
+          "ariaLabel": "Cookie list search",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "select-all-hosts-groups-handler",
+          "name": "",
+          "className": "",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "select-all-vendor-groups-handler",
+          "name": "",
+          "className": "",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "select-all-vendor-leg-handler",
+          "name": "",
+          "className": "",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "chkbox-id",
+          "name": "",
+          "className": "category-filter-handler",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "",
+          "role": "",
+          "tabIndex": "none",
+          "disabled": false,
+          "readonly": false
+        }
+      ]
+    },
+    "onclickElements": {
+      "count": 0,
+      "elements": []
+    },
+    "ariaInteractiveElements": {
+      "count": 5,
+      "elements": [
+        {
+          "tagName": "DIV",
+          "text": "",
+          "id": "",
+          "className": "cdx-header__logo--clarivate",
+          "role": "button",
+          "tabIndex": "0"
+        },
+        {
+          "tagName": "DIV",
+          "text": "Your preferences",
+          "id": "",
+          "className": "ot-active-menu category-menu-switch-handler",
+          "role": "tab",
+          "tabIndex": "0"
+        },
+        {
+          "tagName": "DIV",
+          "text": "Strictly Necessary Cookies",
+          "id": "",
+          "className": "category-menu-switch-handler",
+          "role": "tab",
+          "tabIndex": "-1"
+        },
+        {
+          "tagName": "DIV",
+          "text": "Functional Cookies",
+          "id": "",
+          "className": "category-menu-switch-handler",
+          "role": "tab",
+          "tabIndex": "-1"
+        },
+        {
+          "tagName": "DIV",
+          "text": "Targeting Cookies",
+          "id": "",
+          "className": "category-menu-switch-handler",
+          "role": "tab",
+          "tabIndex": "-1"
+        }
+      ]
+    },
+    "positiveTabindexElements": {
+      "count": 0,
+      "elements": []
+    },
+    "btnClassElements": {
+      "count": 141,
+      "elements": [
+        {
+          "tagName": "SPAN",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-button-persistent-ripple mdc-button__ripple"
+        },
+        {
+          "tagName": "SPAN",
+          "text": "Skip navigation menu\nskipToNav",
+          "id": "",
+          "className": "mdc-button__label"
+        },
+        {
+          "tagName": "SPAN",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-button-touch-target"
+        },
+        {
+          "tagName": "SPAN",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-button-persistent-ripple mdc-button__ripple"
+        },
+        {
+          "tagName": "SPAN",
+          "text": "English",
+          "id": "",
+          "className": "mdc-button__label"
+        },
+        {
+          "tagName": "SPAN",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-button-touch-target"
+        },
+        {
+          "tagName": "SPAN",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-button-persistent-ripple mdc-button__ripple"
+        },
+        {
+          "tagName": "SPAN",
+          "text": "Products",
+          "id": "",
+          "className": "mdc-button__label"
+        },
+        {
+          "tagName": "SPAN",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-button-touch-target"
+        },
+        {
+          "tagName": "SPAN",
+          "text": "",
+          "id": "",
+          "className": "mat-mdc-button-persistent-ripple mdc-button__ripple"
+        }
+      ]
+    }
+  },
+  "targetElements": {
+    "searchInput": {
+      "tagName": "TEXTAREA",
+      "type": "textarea",
+      "id": "advancedSearchInputArea",
+      "className": "search-criteria-input ng-untouched ng-pristine ng-valid",
+      "placeholder": "Enter or edit your query here. You can also combine previous searches e.g. #5 AND #2 ",
+      "selector": "#advancedSearchInputArea"
+    },
+    "searchButton": {
+      "tagName": "BUTTON",
+      "text": "Search",
+      "id": "",
+      "className": "search mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-primary m",
+      "type": "button",
+      "selector": "button.search.ng-star-inserted:not([disabled])"
+    }
+  },
+  "elementStatus": {
+    "hasSearchInput": true,
+    "hasSearchButton": true,
+    "ready": true,
+    "isPageInteractive": true,
+    "pageReady": true
+  }
+}
