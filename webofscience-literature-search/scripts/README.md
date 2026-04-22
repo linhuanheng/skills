@@ -4,20 +4,21 @@ This directory contains all JavaScript scripts used by the Web of Science litera
 
 ## Script Files
 
-### Core Search & Extraction Scripts (v3.4)
+### Core Search & Extraction Scripts (v3.5)
 
 | File | Function | Called When |
 |------|----------|-------------|
 | `find-interactive-elements.js` | Scan all interactive elements, locate input box and button, return JSON | After page load, before any operation |
 | `input-search-query.js` | Input search query (params: `inputSelector`, `query`) | After find-interactive-elements.js, selector read from JSON |
 | `click-search-button.js` | Click the search button (params: `inputSelector`, `buttonSelector`) | After input-search-query.js, selectors read from JSON |
+| `scroll-to-render.js` | Incremental step-scroll: accepts `scrollTo` parameter, bash loops with +500px steps to trigger virtual scroll rendering incrementally, then multi-round height stability check | On results page, before click-show-more.js |
 | `extract-papers-v2.js` | Extract paper info (title, authors, abstract, journal, date, volume, WOS ID, citations). Filters out empty `app-record` elements (virtual scroll placeholders) | After click-show-more.js, before save |
 | `extract-papers.js` | Extract paper list from search results (legacy) | After search completes, after pagination |
 | `extract-detail.js` (v2) | Extract complete info (abstract, keywords, DOI, etc.) | On paper detail page |
 | `open-paper-detail.js` | Click paper title to open in new tab | On results page, before detail extraction |
-| `click-show-more.js` | Click all "Show more" buttons to expand abstracts | On results page, before extract-papers-v2.js |
+| `click-show-more.js` | Click all "Show more" buttons to expand abstracts | On results page, after scroll-to-render.js |
 | `next-page.js` | Click "Top Next Page" button to go to next page (**deprecated in loop** — loop uses inline code to separate check and click) | On results page with multiple pages, after extraction |
-| `scroll-to-bottom.js` | Scroll page to bottom, trigger lazy loading (**deprecated** — WoS virtual scrolling requires incremental scrollTo) | On results page, before click-show-more.js |
+| `scroll-to-bottom.js` | Scroll page to bottom, trigger lazy loading (**deprecated** — replaced by scroll-to-render.js incremental step-scrolling) | On results page, before click-show-more.js |
 | `diagnose-page.js` | Diagnose page structure and troubleshoot | When scripts fail |
 | `generate-markdown-report.js` | Generate Markdown report from JSON data (**deprecated in SKILL.md** — uses local Node.js instead) | After data extraction |
 | `json-helper.mjs` | Node.js JSON processing tool (jq replacement). Subcommands: read, read-stdin, save-pretty, pretty-stdin, url-encode, length-stdin, add-page-number, merge-arrays, build-final-json, extract-field-stdin, merge-page-files, build-final-from-pages | Throughout the workflow |
@@ -37,7 +38,7 @@ click-search-button.js(inputSelector, buttonSelector)  → document.querySelecto
     ↓
 Pagination Loop (repeated per page):
     check-page-ready.js  → wait for page load
-    incremental window.scrollTo → trigger virtual scroll rendering (WoS only renders viewport elements)
+    scroll-to-render.js  → incremental step-scroll (+500px), trigger virtual scroll rendering, multi-round height stability check
     click-show-more.js   → expand all abstracts
     extract-papers-v2.js → extract current page papers (filters empty app-record placeholders)
     json-helper.mjs add-page-number + save-pretty → page_NNN.json (immediate per-page save)
@@ -252,13 +253,21 @@ for i in {1..10}; do
   fi
 done
 
-# 7. Incremental scroll to trigger virtual scroll, then extract results
-for offset in 0 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000; do
-  curl -s -X POST "http://localhost:$PORT/eval?target=ID" \
-    --data-raw "window.scrollTo(0, $offset)" > /dev/null
-  sleep 0.5
+# 7. Adaptive step-scroll to render all records, then extract results
+PREV_HEIGHT=0
+for scroll_round in {1..10}; do
+  offset=0
+  while true; do
+    SCROLL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=ID" \
+      --data-raw "($(cat scripts/scroll-to-render.js))($offset)")
+    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node scripts/json-helper.mjs read-stdin '.scrollHeight // 0')
+    if [ "$offset" -ge "$CURR_HEIGHT" ]; then break; fi
+    offset=$((offset + 500))
+  done
+  if [ "$CURR_HEIGHT" -eq "$PREV_HEIGHT" ] && [ "$CURR_HEIGHT" -gt 0 ]; then break; fi
+  PREV_HEIGHT=$CURR_HEIGHT
+  sleep 1
 done
-sleep 2
 curl -s -X POST "http://localhost:$PORT/eval?target=ID" --data-raw "$(cat scripts/extract-papers-v2.js)"
 
 # 8. Check data quality
@@ -267,9 +276,14 @@ curl -s -X POST "http://localhost:$PORT/eval?target=ID" \
   --data-raw "(function() { const results = [...]; return ${QUALITY_SCRIPT}(results); })()"
 ```
 
-## Script Version (v3.4)
+## Script Version (v3.5)
 
 **Last Updated**: 2026-04-22
+
+### Key Changes in v3.5
+- **Fixed: Incremental step-scrolling** — Direct `scrollTo(0, height)` skips intermediate records, virtual scroll does NOT render skipped content (tested: 50 records page yielded only 6). `scroll-to-render.js` v2.0 now accepts `scrollTo` parameter; bash loops with `offset += 500` call it incrementally to trigger virtual scroll rendering step-by-step, then multi-round height stability check ensures all records are loaded
+- **Deprecated**: Fixed offset `for offset in 0 1000 ... 12000` loops, direct `scrollTo(0, height)`, and `scroll-to-bottom.js` — all miss records
+- **Updated**: All scrolling logic in SKILL.md Steps 3, 4, 5 now uses `scroll-to-render.js` + bash incremental step loop
 
 ### Key Changes in v3.4
 - **Fixed: Virtual scrolling** — WoS uses virtual scrolling, only renders viewport-visible DOM elements. `scroll-to-bottom.js` (async Promise) doesn't work with CDP Proxy `/eval`. Replaced with incremental `window.scrollTo(0, offset)` (0→12000, step 1000, 0.5s each)
@@ -323,5 +337,5 @@ curl -s -X POST "http://localhost:$PORT/eval?target=ID" \
 5. **Selector Updates**: If Web of Science updates page structure, update selectors in `extract-papers-v2.js`
 6. **Journal Names**: Use full journal names (not abbreviations) for journal scope searches
 7. **Network Environment**: The skill assumes campus network environment where Web of Science is accessible without login. It attempts search directly and reports failure only after all retry attempts fail.
-8. **Virtual Scrolling**: WoS uses virtual scrolling — only viewport-visible elements are in DOM. Must use incremental `window.scrollTo(0, offset)` to trigger rendering of all records before extraction. Do NOT use `scroll-to-bottom.js` (async Promise not awaited by CDP Proxy).
+8. **Virtual Scrolling**: WoS uses virtual scrolling — only viewport-visible elements are in DOM. **Direct `scrollTo(0, height)` skips intermediate records** — virtual scroll does NOT render skipped content (tested: 50 records page yielded only 6). Must use `scroll-to-render.js` with incremental step-scrolling: bash loops with `offset += 500`, calling `scroll-to-render.js($offset)` each step to trigger rendering incrementally, then multi-round height stability check. Do NOT use `scroll-to-bottom.js` (async Promise), fixed offset `for offset in ...` loops, or direct `scrollTo(0, height)` — all will miss records.
 9. **Pagination in Loops**: When implementing pagination loops, check button state and click in separate steps. `next-page.js` does both simultaneously, causing page-skip bugs in loops.

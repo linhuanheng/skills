@@ -1,11 +1,11 @@
 {
   "success": true,
-  "timestamp": "2026-04-22T08:38:00.142Z",
+  "timestamp": "2026-04-22T09:22:26.950Z",
   "url": "https://webofscience.clarivate.cn/wos/alldb/advanced-search",
   "title": "Advanced search - All Databases",
   "interactiveElements": {
     "links": {
-      "count": 35,
+      "count": 38,
       "elements": [
         {
           "tagName": "A",
@@ -99,6 +99,36 @@
         },
         {
           "tagName": "A",
+          "text": "309",
+          "href": "/wos/alldb/summary/560ad8ed-78cc-427d-bc0a-9adf711549d4-01aec565af/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "309",
+          "href": "/wos/alldb/summary/674e7acc-abef-4a99-9ab8-14e9abfb7a13-01aec565a2/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "309",
+          "href": "/wos/alldb/summary/94639fc2-fead-4091-b220-c5f42670e97b-01aec5659e/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
           "text": "372",
           "href": "/wos/alldb/summary/d0c7218f-aaf7-4d4d-a77c-ffa665a4a0e1-01aebd9860/relevance/1",
           "id": "",
@@ -176,41 +206,11 @@
           "hasOnClick": false,
           "role": "",
           "tabIndex": "none"
-        },
-        {
-          "tagName": "A",
-          "text": "",
-          "href": "http://lib.jnu.edu.cn/",
-          "id": "InstLogoTa-0",
-          "className": "",
-          "hasOnClick": false,
-          "role": "",
-          "tabIndex": "none"
-        },
-        {
-          "tagName": "A",
-          "text": "",
-          "href": "https://clarivate.com.cn/e-clarivate/wos.htm",
-          "id": "InstLogoTa-1",
-          "className": "",
-          "hasOnClick": false,
-          "role": "",
-          "tabIndex": "none"
-        },
-        {
-          "tagName": "A",
-          "text": "Legal Center",
-          "href": "https://clarivate.com/legal-center/",
-          "id": "",
-          "className": "",
-          "hasOnClick": false,
-          "role": "",
-          "tabIndex": "none"
         }
       ]
     },
     "buttons": {
-      "count": 73,
+      "count": 85,
       "elements": [
         {
           "tagName": "BUTTON",
@@ -455,7 +455,7 @@
       ]
     },
     "formControls": {
-      "count": 20,
+      "count": 23,
       "elements": [
         {
           "tagName": "INPUT",
@@ -478,7 +478,7 @@
           "name": "search",
           "className": "search-criteria-input ng-untouched ng-pristine ng-valid",
           "placeholder": "Enter or edit your query here. You can also combine previous searches e.g. #5 AND #2 ",
-          "value": "TS=(\"volatility\" OR \"asset pricing\" OR \"risk premi",
+          "value": "TS=(\"volatility\" OR \"asset pricing\") AND SO=(\"Jour",
           "ariaLabel": "",
           "role": "",
           "tabIndex": "none",
@@ -516,7 +516,7 @@
         {
           "tagName": "INPUT",
           "type": "checkbox",
-          "id": "mat-mdc-checkbox-10-input",
+          "id": "mat-mdc-checkbox-13-input",
           "name": "",
           "className": "mdc-checkbox__native-control",
           "placeholder": "",
@@ -530,7 +530,7 @@
         {
           "tagName": "INPUT",
           "type": "checkbox",
-          "id": "mat-mdc-checkbox-11-input",
+          "id": "mat-mdc-checkbox-14-input",
           "name": "",
           "className": "mdc-checkbox__native-control",
           "placeholder": "",
@@ -642,6 +642,48 @@
         {
           "tagName": "INPUT",
           "type": "checkbox",
+          "id": "mat-mdc-checkbox-10-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-11-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-12-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
           "id": "ot-group-id-C0003",
           "name": "ot-group-id-C0003",
           "className": "category-switch-handler",
@@ -687,48 +729,6 @@
           "id": "select-all-hosts-groups-handler",
           "name": "",
           "className": "",
-          "placeholder": "",
-          "value": "on",
-          "ariaLabel": "",
-          "role": "",
-          "tabIndex": "none",
-          "disabled": false,
-          "readonly": false
-        },
-        {
-          "tagName": "INPUT",
-          "type": "checkbox",
-          "id": "select-all-vendor-groups-handler",
-          "name": "",
-          "className": "",
-          "placeholder": "",
-          "value": "on",
-          "ariaLabel": "",
-          "role": "",
-          "tabIndex": "none",
-          "disabled": false,
-          "readonly": false
-        },
-        {
-          "tagName": "INPUT",
-          "type": "checkbox",
-          "id": "select-all-vendor-leg-handler",
-          "name": "",
-          "className": "",
-          "placeholder": "",
-          "value": "on",
-          "ariaLabel": "",
-          "role": "",
-          "tabIndex": "none",
-          "disabled": false,
-          "readonly": false
-        },
-        {
-          "tagName": "INPUT",
-          "type": "checkbox",
-          "id": "chkbox-id",
-          "name": "",
-          "className": "category-filter-handler",
           "placeholder": "",
           "value": "on",
           "ariaLabel": "",
@@ -793,7 +793,7 @@
       "elements": []
     },
     "btnClassElements": {
-      "count": 141,
+      "count": 169,
       "elements": [
         {
           "tagName": "SPAN",

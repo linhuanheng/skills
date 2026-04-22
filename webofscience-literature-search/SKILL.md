@@ -305,14 +305,28 @@ DIAGNOSE_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID"
   --data-raw "$(cat scripts/diagnose-page.js)")
 echo "Page diagnosis: $DIAGNOSE_RESULT"
 
-# 6. Incremental scroll to trigger virtual scroll (WoS uses virtual scrolling)
-echo "Scrolling to load all records..."
-for offset in 0 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000 11000 12000; do
-  curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-    --data-raw "window.scrollTo(0, $offset)" > /dev/null
-  sleep 0.5
+# 6. Adaptive scroll to render all records (WoS virtual scrolling)
+#    Direct scrollTo(0, height) skips intermediate records — virtual scroll only renders viewport.
+#    Must step incrementally (500px at a time), then repeat until page height stabilizes.
+echo "Scrolling to load all records (adaptive step-scroll)..."
+PREV_HEIGHT=0
+for scroll_round in {1..10}; do
+  offset=0
+  while true; do
+    SCROLL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
+      --data-raw "($(cat scripts/scroll-to-render.js))($offset)")
+    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node scripts/json-helper.mjs read-stdin '.scrollHeight // 0')
+    if [ "$offset" -ge "$CURR_HEIGHT" ]; then break; fi
+    offset=$((offset + 500))
+  done
+  echo "Scroll round $scroll_round: height=$CURR_HEIGHT (prev=$PREV_HEIGHT)"
+  if [ "$CURR_HEIGHT" -eq "$PREV_HEIGHT" ] && [ "$CURR_HEIGHT" -gt 0 ]; then
+    echo "Page height stable at $CURR_HEIGHT, all records rendered"
+    break
+  fi
+  PREV_HEIGHT=$CURR_HEIGHT
+  sleep 1
 done
-sleep 2
 
 echo "Extracting results..."
 EXTRACT_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
@@ -363,13 +377,21 @@ echo "Retry click result: $CLICK_RESULT"
 # Wait for page redirect
 sleep 8
 
-# Incremental scroll to trigger virtual scroll
-for offset in 0 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000; do
-  curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-    --data-raw "window.scrollTo(0, $offset)" > /dev/null
-  sleep 0.5
+# Adaptive step-scroll to render all records
+PREV_HEIGHT=0
+for scroll_round in {1..10}; do
+  offset=0
+  while true; do
+    SCROLL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
+      --data-raw "($(cat scripts/scroll-to-render.js))($offset)")
+    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node scripts/json-helper.mjs read-stdin '.scrollHeight // 0')
+    if [ "$offset" -ge "$CURR_HEIGHT" ]; then break; fi
+    offset=$((offset + 500))
+  done
+  if [ "$CURR_HEIGHT" -eq "$PREV_HEIGHT" ] && [ "$CURR_HEIGHT" -gt 0 ]; then break; fi
+  PREV_HEIGHT=$CURR_HEIGHT
+  sleep 1
 done
-sleep 2
 
 EXTRACT_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
   --data-raw "$(cat scripts/extract-papers-v2.js)")
@@ -383,13 +405,21 @@ QUERY_FOR_URL=$(echo "${SEARCH_QUERY}" | node scripts/json-helper.mjs url-encode
 curl -s "http://localhost:$PORT/navigate?target=TARGET_ID&url=https://webofscience.clarivate.cn/wos/alldb/result?count=50&Q=$QUERY_FOR_URL"
 sleep 5
 
-# Incremental scroll to trigger virtual scroll
-for offset in 0 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000; do
-  curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-    --data-raw "window.scrollTo(0, $offset)" > /dev/null
-  sleep 0.5
+# Adaptive step-scroll to render all records
+PREV_HEIGHT=0
+for scroll_round in {1..10}; do
+  offset=0
+  while true; do
+    SCROLL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
+      --data-raw "($(cat scripts/scroll-to-render.js))($offset)")
+    CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node scripts/json-helper.mjs read-stdin '.scrollHeight // 0')
+    if [ "$offset" -ge "$CURR_HEIGHT" ]; then break; fi
+    offset=$((offset + 500))
+  done
+  if [ "$CURR_HEIGHT" -eq "$PREV_HEIGHT" ] && [ "$CURR_HEIGHT" -gt 0 ]; then break; fi
+  PREV_HEIGHT=$CURR_HEIGHT
+  sleep 1
 done
-sleep 2
 
 # Extract results
 curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
@@ -400,7 +430,7 @@ curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
 
 如果检索成功（`totalPapers > 0`），进入翻页循环提取所有页面的文献：
 
-**重要说明**：WoS 使用虚拟滚动（virtual scrolling），只渲染视口内可见的 DOM 元素。为触发所有记录加载，必须使用增量滚动（逐段 `window.scrollTo`），而不是一次性滚到底。`scroll-to-bottom.js` 基于异步 Promise，CDP Proxy `/eval` 不会等待 Promise 解析，因此不再使用。此外，翻页检查和点击必须分开执行，避免 `next-page.js` 检查时同时点击导致页面跳跃。
+**重要说明**：WoS 使用虚拟滚动（virtual scrolling），只渲染视口内可见的 DOM 元素。**直接 `scrollTo(0, height)` 跳到底部会跳过中间记录，导致虚拟滚动不渲染被跳过的部分**（测试中50篇仅提取6篇）。必须使用 `scroll-to-render.js` 增量步进滚动（每次+500px），逐步触发虚拟滚动渲染，然后多轮检测页面高度是否稳定。固定偏移量 `for offset in ...` 和 `scroll-to-bottom.js` 均已弃用。此外，翻页检查和点击必须分开执行，避免 `next-page.js` 检查时同时点击导致页面跳跃。
 
 ```bash
 # Results directory (under project root)
@@ -444,15 +474,28 @@ while [ "$PAGE_NUMBER" -le "$MAX_PAGES" ]; do
     sleep 5
   fi
 
-  # 2. Incremental scroll to trigger virtual scroll (WoS virtual scrolling)
-  #    Must scroll in increments, not all-at-once, to trigger rendering of all records
-  echo "Scrolling to load all records..."
-  for offset in 0 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000 11000 12000; do
-    curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
-      --data-raw "window.scrollTo(0, $offset)" > /dev/null
-    sleep 0.5
+  # 2. Adaptive step-scroll to render all records (WoS virtual scrolling)
+  #    Direct scrollTo(0, height) skips intermediate records — virtual scroll only renders viewport.
+  #    Must step incrementally (500px at a time), then repeat until page height stabilizes.
+  echo "Scrolling to load all records (adaptive step-scroll)..."
+  PREV_HEIGHT=0
+  for scroll_round in {1..10}; do
+    offset=0
+    while true; do
+      SCROLL_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
+        --data-raw "($(cat scripts/scroll-to-render.js))($offset)")
+      CURR_HEIGHT=$(echo "$SCROLL_RESULT" | node scripts/json-helper.mjs read-stdin '.scrollHeight // 0')
+      if [ "$offset" -ge "$CURR_HEIGHT" ]; then break; fi
+      offset=$((offset + 500))
+    done
+    echo "  Scroll round $scroll_round: height=$CURR_HEIGHT (prev=$PREV_HEIGHT)"
+    if [ "$CURR_HEIGHT" -eq "$PREV_HEIGHT" ] && [ "$CURR_HEIGHT" -gt 0 ]; then
+      echo "  Page height stable at $CURR_HEIGHT"
+      break
+    fi
+    PREV_HEIGHT=$CURR_HEIGHT
+    sleep 1
   done
-  sleep 2
 
   # 3. Expand all abstracts on current page (click Show more)
   SHOW_MORE_RESULT=$(curl -s -X POST "http://localhost:$PORT/eval?target=TARGET_ID" \
@@ -633,7 +676,7 @@ echo "  - Markdown: ${RESULTS_DIR}/${TOPIC_SLUG}_${TIMESTAMP}.md"
 3. 页码达到 `MAX_PAGES=50` 上限
 
 **重要注意事项**：
-1. **增量滚动（必须）**：WoS 使用虚拟滚动，仅渲染视口内的 DOM 元素。必须逐段 `window.scrollTo(0, offset)` 触发渲染，否则 `extract-papers-v2.js` 大部分记录会为空
+1. **增量步进自适应滚动（必须）**：WoS 使用虚拟滚动，仅渲染视口内的 DOM 元素。直接 `scrollTo(0, height)` 跳到底部会跳过中间记录，虚拟滚动不渲染被跳过的部分（测试中50篇仅提取6篇）。必须使用 `scroll-to-render.js` 增量步进（每次+500px）逐步触发渲染，然后多轮检测页面高度是否稳定。否则 `extract-papers-v2.js` 会遗漏大量记录
 2. **翻页检查与点击分离（必须）**：`next-page.js` 同时检查和点击按钮，在循环中调用会导致检查时即翻页。必须用内联代码仅检查按钮状态，然后在确认有下一页后才单独执行点击
 3. **Markdown 生成使用本地 Node.js**：`generate-markdown-report.js` 使用 IIFE + 全局变量检测，在 CDP Proxy `/eval` 中无法正确执行（返回 `undefined`）。改用本地 `node -e` 脚本生成报告
 
@@ -776,7 +819,8 @@ echo "Failure record saved: ${RESULTS_DIR}/${TOPIC_SLUG}_failure_${TIMESTAMP}.md
 | `input-search-query.js` | 向输入框中填入检索式（参数：inputSelector, query） |
 | `click-search-button.js` | 点击搜索按钮（参数：inputSelector, buttonSelector） |
 | `interactive-elements.json` | find-interactive-elements.js 的输出，存储选择器信息 |
-| `scroll-to-bottom.js` | 异步滚动到底部（**已弃用**，WoS 虚拟滚动需增量 scrollTo） |
+| `scroll-to-render.js` | 增量步进自适应滚动（接受 scrollTo 参数，bash 每次+500px 调用，逐段触发虚拟滚动渲染，多轮检测高度稳定性） |
+| `scroll-to-bottom.js` | 异步滚动到底部（**已弃用**，改用 scroll-to-render.js） |
 | `click-show-more.js` | 点击页面中所有 "Show more" 按钮展开摘要 |
 | `extract-papers-v2.js` | 提取当前页文献列表（标题、期刊、作者、摘要等），自动过滤空 app-record |
 | `next-page.js` | 点击 "Top Next Page" 按钮翻页（**已弃用**，循环中使用内联代码分离检查和点击） |
@@ -798,7 +842,7 @@ input-search-query.js（输入检索式）→ click-search-button.js（点击搜
     ↓
 totalPapers > 0? → 是 → 进入第五步翻页循环
     ↓ 否                       ↓
-刷新页面 → 重新定位          循环：增量滚动 → show more → 提取 → 翻页?
+刷新页面 → 重新定位          循环：自适应滚动 → show more → 提取 → 翻页?
     ↓                              ↓ hasNext=false
 input-search-query.js         保存合并 JSON → 本地生成 Markdown 报告
 → click-search-button.js
@@ -828,7 +872,7 @@ click-search-button.js(inputSelector, buttonSelector)  → document.querySelecto
 第五步翻页循环（每页重复以下操作）：
     ↓
     check-page-ready.js  → 等待页面加载就绪
-    增量 window.scrollTo → 逐段滚动触发虚拟滚动渲染（WoS 虚拟滚动，仅渲染视口内元素）
+    scroll-to-render.js  → 增量步进滚动（每次+500px），逐段触发虚拟滚动渲染，多轮检测高度稳定性
     click-show-more.js   → 展开所有摘要
     extract-papers-v2.js → 提取当前页文献（papers 数组，已过滤空 app-record）
     json-helper.mjs add-page-number + save-pretty → page_NNN.json（每页立即保存到临时文件）
@@ -842,10 +886,16 @@ json-helper.mjs build-final-from-pages（合并所有 page_NNN.json）→ 保存
 ```
 
 ---
-*版本：3.4（虚拟滚动修复版）*
+*版本：3.5（自适应滚动修复版）*
 *更新日期：2026-04-22*
 
 ## 修复日志
+
+### v3.5 (2026-04-22) - 自适应滚动修复版
+- **核心修复：增量步进自适应滚动**：WoS 虚拟滚动下直接 `scrollTo(0, height)` 跳到底部会跳过中间记录，虚拟滚动不渲染被跳过的部分（测试中50篇仅提取6篇）。`scroll-to-render.js` 改为接受参数模式：bash 端用 `offset` 变量每次+500px 逐步调用，逐段触发虚拟滚动渲染，然后多轮检测页面高度是否稳定，直到不再增长
+- **新增脚本**：`scroll-to-render.js` v2.0 — 接受 `scrollTo` 参数指定滚动位置，bash 端增量步进调用
+- **更新第三步/第四步/第五步**：所有滚动逻辑替换为 `scroll-to-render.js` + bash 增量步进循环
+- **弃用标记**：固定偏移量 `for offset in 0 1000 ... 12000`、直接 `scrollTo(0, height)` 和 `scroll-to-bottom.js` 均已弃用
 
 ### v3.4 (2026-04-22) - 虚拟滚动修复版
 - **核心修复：增量滚动替代 scroll-to-bottom.js**：WoS 使用虚拟滚动，仅渲染视口内 DOM 元素。`scroll-to-bottom.js` 基于异步 Promise，CDP Proxy `/eval` 不会等待 Promise 解析，且一次性滚到底无法触发虚拟滚动逐段渲染。改用 `window.scrollTo(0, offset)` 增量滚动（0→12000，步长1000，每步 0.5s）
