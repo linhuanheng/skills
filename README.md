@@ -6,11 +6,12 @@
 
 ```
 skills/
-├── data-analysis/                        # 数据分析技能
+├── data-analysis/                         # 数据分析技能
 ├── economic-model-derivation-guidance/    # 经济模型推导指导技能
 ├── literature-review-economics/           # 经济金融学文献整理总结技能
-├── web-access/                           # 网页访问技能（基础依赖）
-└── webofscience-literature-search/       # Web of Science 学术文献检索技能
+├── web-access/                            # 网页访问技能（基础依赖）
+└── webofscience-literature-search/        # Web of Science 学术文献检索技能 (v3.5)
+    └── scripts/                           # 检索脚本文件（15 个 JS + 1 个 MJS + 1 个 SH）
 ```
 
 ## 🔧 技能清单
@@ -87,21 +88,54 @@ python scripts/descriptive_stats.py --input your_data.csv --output report.md
 - Node.js 22+ 和 Chrome 开启远程调试
 - 支持端口冲突自动检测并切换 ([由某个不想干体力活的 PhD Student](https://github.com/linhuanheng) 开发补充)
 
-### 5. **webofscience-literature-search** - Web of Science 学术文献检索工具
-**功能**：指导使用 web-access 在 Web of Science 平台进行专业学术文献检索。
+### 5. **webofscience-literature-search** - Web of Science 学术文献检索工具 (v3.5)
+**功能**：指导使用 web-access 在 Web of Science 平台进行专业学术文献检索，支持多页翻页提取、虚拟滚动处理、增量步进自适应滚动。
 
-**核心特点**：
+**核心特点 (v3.5)**：
 - 必须使用 web-access 进行网页交互
-- 完整的登录认证流程处理
-- 支持基础检索、高级检索、引文检索
-- 提供经济学/金融学期刊列表供用户选择
-- 检索结果结构化导出（CSV/Markdown）
+- **需求确认环节**：先与用户确认检索需求再执行操作
+  - 提炼关键词：从用户描述中识别 2-4 个核心学术关键词
+  - 确认关键词：展示提炼列表供用户确认或修改
+  - 期刊范围选择：提供经济金融学国际顶刊列表（20+ 本顶刊）
+  - 时间范围确认：支持多种格式（YYYY-YYYY、YYYY、recent-X-years、all）
+- **三步检索模式**：查找交互元素 → 输入检索式 → 点击搜索按钮，选择器保存为 JSON 文件
+- **增量步进自适应滚动**：WoS 虚拟滚动下直接 `scrollTo` 跳到底部会跳过中间记录，必须每次+500px 逐步触发渲染，多轮检测页面高度稳定性
+- **多页翻页提取**：自动翻阅所有结果页面，每页立即保存为临时文件 `page_NNN.json`，循环结束后合并
+- **翻页检查与点击分离**：`next-page.js` 检查时同时点击导致跳页，改用内联代码分离检查和点击
+- **校园网优化**：默认无需登录检测，直接尝试检索
+- **本地 Markdown 生成**：`generate-markdown-report.js` 在 CDP Proxy 中返回 undefined，改用本地 `node -e` 脚本
+- **Node.js 替代 jq**：`json-helper.mjs` 替代 Windows 缺失的 jq，支持读取字段、美化保存、URL编码、数组操作、页面文件合并等
+- **失败重试机制**：三级重试（高级检索 → 刷新重试 → 直接结果页）
+- **结构化导出**：先保存 JSON 原始数据，再从 JSON 生成 Markdown 报告（含年份分布、期刊分布、Top100按被引排序、Top20含摘要）
+
+**期刊列表覆盖**（经济金融学国际顶刊）：
+- 综合性顶刊：AER, QJE, JPE, Econometrica, RESTUD, AEJ 系列
+- 金融学顶刊：JF, JFE, RFS, JFQA, RF
+- 国际金融/宏观经济：Journal of International Economics, Journal of Monetary Economics 等
+- 计量/方法顶刊：Journal of Econometrics, Econometric Journal 等
+- 微观经济学顶刊：Journal of Economic Theory, Games and Economic Behavior 等
 
 **主要功能**：
-1. 基础关键词检索
-2. 高级检索（作者、期刊、年份等）
-3. 引文检索和引用分析
-4. 检索结果导出和批量处理
+1. 需求确认与关键词提炼
+2. 期刊范围选择（顶刊列表/自定义）
+3. 时间范围设定
+4. 高级检索（三步模式：查找元素 → 输入检索式 → 点击搜索）
+5. 多页翻页自动提取（每页独立保存，循环结束合并）
+6. 增量步进自适应滚动（确保虚拟滚动记录全部渲染）
+7. 文献详情查看（新标签页打开并提取摘要、关键词、DOI等）
+8. 检索结果导出（JSON + Markdown 报告，含统计分析和高被引论文摘要）
+9. 失败自动记录与诊断
+
+**脚本文件**：
+所有脚本已提取至 `scripts/` 目录，共 17 个文件：
+- 检索操作：`find-interactive-elements.js`, `input-search-query.js`, `click-search-button.js`
+- 滚动渲染：`scroll-to-render.js`（增量步进自适应滚动）
+- 数据提取：`extract-papers-v2.js`, `extract-papers.js`, `extract-detail.js`
+- 页面交互：`click-show-more.js`, `next-page.js`（弃用）, `open-paper-detail.js`
+- 导航控制：`check-page-ready.js`, `diagnose-page.js`
+- 数据导出：`check-data-quality.js`, `generate-markdown-report.js`
+- 工具脚本：`json-helper.mjs`（Node.js 替代 jq）, `check-env.sh`
+- 已弃用：`scroll-to-bottom.js`, `perform-search.js`, `export-csv.js`, `export-json.js`, `export-markdown.js`, `flip-page.js`
 
 ## 🔄 技能依赖关系
 
@@ -135,7 +169,7 @@ data-analysis
 1. **Node.js 22+**：所有技能运行的基础环境
 2. **Chrome 浏览器**：开启远程调试（chrome://inspect/#remote-debugging）
 3. **Zotero 及 zotero-mcp 服务器**：用于 `literature-review-economics` 技能
-4. **Web of Science 账号**：用于 `webofscience-literature-search` 技能（需机构订阅）
+4. **Web of Science 校园网访问**：用于 `webofscience-literature-search` 技能（需机构订阅，校园网无需登录）
 5. **MarkItDown MCP 服务**: 用于 `literature-review-economics` 技能
 6. **Python 3.8+**：用于 `data-analysis` 技能
 7. **Python 依赖库**：pandas、numpy、scipy、statsmodels（用于 `data-analysis` 技能）
@@ -147,7 +181,7 @@ data-analysis
 - ✅ **economic-model-derivation-guidance**：完整，已包含完整推导流程
 - ✅ **literature-review-economics**：完整，已实现智能文献类型判断
 - ✅ **web-access**：完整，v2.4.3 版本
-- ✅ **webofscience-literature-search**：完整，集成 web-access 使用
+- ✅ **webofscience-literature-search**：v3.5，集成 web-access，三步检索模式、增量步进自适应滚动、多页翻页提取、本地 Markdown 生成、Node.js 替代 jq
 
 ## 🔍 注意事项
 
@@ -164,10 +198,6 @@ data-analysis
 - [skills CLI 包管理器](https://github.com/vercel-labs/skills)
 - [MarkItDown MCP 服务器](https://github.com/mcp/microsoft/markitdown)
 
-## ⚠ 问题与改进建议
-
-当前为一个私有项目，因此只有合作者能够看到。大家使用后有啥问题或者觉得可以改进的地方，欢迎在Issues中留言~
-
 ## 👥 作者与贡献
 
 本项目为 Claude Code Skills 开发项目，各技能基于开源社区成果和自定义开发。
@@ -178,4 +208,4 @@ data-analysis
 
 ---
 
-*最后更新：2026 年 4 月 20 日*
+*最后更新：2026 年 4 月 22 日 (webofscience-literature-search v3.5 同步)*
