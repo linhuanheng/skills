@@ -5,13 +5,18 @@
 ## 📁 项目结构
 
 ```
-skills/
-├── data-analysis/                         # 数据分析技能
-├── economic-model-derivation-guidance/    # 经济模型推导指导技能
-├── literature-review-economics/           # 经济金融学文献整理总结技能
-├── web-access/                            # 网页访问技能（基础依赖）
-└── webofscience-literature-search/        # Web of Science 学术文献检索技能 (v3.5)
-    └── scripts/                           # 检索脚本文件（15 个 JS + 1 个 MJS + 1 个 SH）
+skill_production/
+├── SEARCH_RESULTS/                              # 检索结果输出目录
+│   ├── *.json                                   # 原始检索数据
+│   └── *.md                                     # Markdown 检索报告
+├── data-analysis/                               # 数据分析技能
+├── economic-model-derivation-guidance/          # 经济模型推导指导技能
+├── literature-review-economics/                 # 经济金融学文献整理总结技能
+├── web-access/                                  # 网页访问技能（基础依赖）
+└── webofscience-literature-search/              # Web of Science 学术文献检索技能 (v3.6)
+    └── scripts/                                 # 检索脚本文件（20+ 文件）
+        ├── run-search.sh                        #   自动化流水线脚本（一键检索）
+        └── ...
 ```
 
 ## 🔧 技能清单
@@ -67,6 +72,7 @@ python scripts/descriptive_stats.py --input your_data.csv --output report.md
   - 实证文章：侧重实证设计、数据质量、识别策略
   - 理论文章：侧重经济直觉、模型构建逻辑、命题推导
 - 多维度文献分析：主题归类、方法学分析、结论对比、研究脉络
+- 支持 markitdown MCP 高质量 PDF 解析
 
 **适用场景**：
 - 学术文献综述撰写
@@ -88,25 +94,31 @@ python scripts/descriptive_stats.py --input your_data.csv --output report.md
 - Node.js 22+ 和 Chrome 开启远程调试
 - 支持端口冲突自动检测并切换 ([由某个不想干体力活的 PhD Student](https://github.com/linhuanheng) 开发补充)
 
-### 5. **webofscience-literature-search** - Web of Science 学术文献检索工具 (v3.5)
-**功能**：指导使用 web-access 在 Web of Science 平台进行专业学术文献检索，支持多页翻页提取、虚拟滚动处理、增量步进自适应滚动。
+### 5. **webofscience-literature-search** - Web of Science 学术文献检索工具 (v3.6)
+**功能**：指导使用 web-access 在 Web of Science 平台进行专业学术文献检索，支持自动化流水线一键检索、多页翻页提取、虚拟滚动处理。
 
-**核心特点 (v3.5)**：
+**核心特点 (v3.6)**：
 - 必须使用 web-access 进行网页交互
 - **需求确认环节**：先与用户确认检索需求再执行操作
   - 提炼关键词：从用户描述中识别 2-4 个核心学术关键词
   - 确认关键词：展示提炼列表供用户确认或修改
   - 期刊范围选择：提供经济金融学国际顶刊列表（20+ 本顶刊）
   - 时间范围确认：支持多种格式（YYYY-YYYY、YYYY、recent-X-years、all）
-- **三步检索模式**：查找交互元素 → 输入检索式 → 点击搜索按钮，选择器保存为 JSON 文件
+- **自动化流水线**（v3.6 新增）：`run-search.sh` 将步骤 1-5 合并为单次 bash 调用
+  - 所有变量在同一 shell 进程内传递，无跨调用状态丢失
+  - `strip_value()` 函数自动剥离 CDP Proxy `{"value": {...}}` 包装
+  - 一键生成 JSON 原始数据 + Markdown 报告
+  - 使用方式：`bash $SKILL_DIR/scripts/run-search.sh "关键词" "期刊" "年份" "主题"`
+- **SKILL_DIR 绝对路径**（v3.6 修复）：所有脚本引用使用 `$SKILL_DIR/scripts/xxx.js` 绝对路径变量，解决 Claude Code Bash CWD 不一致问题
 - **增量步进自适应滚动**：WoS 虚拟滚动下直接 `scrollTo` 跳到底部会跳过中间记录，必须每次+500px 逐步触发渲染，多轮检测页面高度稳定性
 - **多页翻页提取**：自动翻阅所有结果页面，每页立即保存为临时文件 `page_NNN.json`，循环结束后合并
-- **翻页检查与点击分离**：`next-page.js` 检查时同时点击导致跳页，改用内联代码分离检查和点击
 - **校园网优化**：默认无需登录检测，直接尝试检索
-- **本地 Markdown 生成**：`generate-markdown-report.js` 在 CDP Proxy 中返回 undefined，改用本地 `node -e` 脚本
-- **Node.js 替代 jq**：`json-helper.mjs` 替代 Windows 缺失的 jq，支持读取字段、美化保存、URL编码、数组操作、页面文件合并等
 - **失败重试机制**：三级重试（高级检索 → 刷新重试 → 直接结果页）
 - **结构化导出**：先保存 JSON 原始数据，再从 JSON 生成 Markdown 报告（含年份分布、期刊分布、Top100按被引排序、Top20含摘要）
+
+**两种使用模式**：
+1. **自动化模式**（推荐）：确认检索参数后，AI 调用 `run-search.sh` 一键完成
+2. **交互模式**（备用）：AI 逐步执行各步骤，适合调试
 
 **期刊列表覆盖**（经济金融学国际顶刊）：
 - 综合性顶刊：AER, QJE, JPE, Econometrica, RESTUD, AEJ 系列
@@ -120,22 +132,24 @@ python scripts/descriptive_stats.py --input your_data.csv --output report.md
 2. 期刊范围选择（顶刊列表/自定义）
 3. 时间范围设定
 4. 高级检索（三步模式：查找元素 → 输入检索式 → 点击搜索）
-5. 多页翻页自动提取（每页独立保存，循环结束合并）
-6. 增量步进自适应滚动（确保虚拟滚动记录全部渲染）
-7. 文献详情查看（新标签页打开并提取摘要、关键词、DOI等）
-8. 检索结果导出（JSON + Markdown 报告，含统计分析和高被引论文摘要）
-9. 失败自动记录与诊断
+5. 自动化流水线一键检索（v3.6 新增）
+6. 多页翻页自动提取（每页独立保存，循环结束合并）
+7. 增量步进自适应滚动（确保虚拟滚动记录全部渲染）
+8. 文献详情查看（新标签页打开并提取摘要、关键词、DOI等）
+9. 检索结果导出（JSON + Markdown 报告，含统计分析和高被引论文摘要）
+10. 失败自动记录与诊断
 
 **脚本文件**：
-所有脚本已提取至 `scripts/` 目录，共 17 个文件：
-- 检索操作：`find-interactive-elements.js`, `input-search-query.js`, `click-search-button.js`
-- 滚动渲染：`scroll-to-render.js`（增量步进自适应滚动）
-- 数据提取：`extract-papers-v2.js`, `extract-papers.js`, `extract-detail.js`
-- 页面交互：`click-show-more.js`, `next-page.js`（弃用）, `open-paper-detail.js`
-- 导航控制：`check-page-ready.js`, `diagnose-page.js`
-- 数据导出：`check-data-quality.js`, `generate-markdown-report.js`
-- 工具脚本：`json-helper.mjs`（Node.js 替代 jq）, `check-env.sh`
-- 已弃用：`scroll-to-bottom.js`, `perform-search.js`, `export-csv.js`, `export-json.js`, `export-markdown.js`, `flip-page.js`
+所有脚本已提取至 `scripts/` 目录，共 20+ 文件：
+- **自动化流水线**：`run-search.sh`（一键检索脚本）、`execute-search-stepwise.sh`
+- **检索操作**：`find-interactive-elements.js`, `input-search-query.js`, `click-search-button.js`
+- **滚动渲染**：`scroll-to-render.js`（增量步进自适应滚动）
+- **数据提取**：`extract-papers-v2.js`, `extract-papers.js`, `extract-detail.js`, `merge-visible-papers.mjs`
+- **页面交互**：`click-show-more.js`, `open-paper-detail.js`
+- **导航控制**：`check-page-ready.js`, `diagnose-page.js`, `next-page.js`（弃用）
+- **数据导出**：`check-data-quality.js`, `generate-markdown-report.js`
+- **工具脚本**：`json-helper.mjs`（Node.js 替代 jq）, `check-env.sh`, `interactive-elements.json`
+- **已弃用**：`scroll-to-bottom.js`, `perform-search.js`, `export-csv.js`, `export-json.js`, `export-markdown.js`, `flip-page.js`
 
 ## 🔄 技能依赖关系
 
@@ -163,6 +177,14 @@ data-analysis
 - 仅需理论推导时：直接使用 `economic-model-derivation-guidance`
 - 仅需网页访问时：直接使用 `web-access`
 
+## 📂 检索结果
+
+检索结果保存在 `SEARCH_RESULTS/` 目录下：
+- `*.json`：原始检索数据（所有文献的完整信息）
+- `*.md`：Markdown 检索报告（含文献表格、统计分布、高引摘要）
+
+目录会随检索自动创建，无需手动建立。
+
 ## ⚙️ 环境要求
 
 ### 必备配置
@@ -170,10 +192,9 @@ data-analysis
 2. **Chrome 浏览器**：开启远程调试（chrome://inspect/#remote-debugging）
 3. **Zotero 及 zotero-mcp 服务器**：用于 `literature-review-economics` 技能
 4. **Web of Science 校园网访问**：用于 `webofscience-literature-search` 技能（需机构订阅，校园网无需登录）
-5. **MarkItDown MCP 服务**: 用于 `literature-review-economics` 技能
+5. **MarkItDown MCP 服务**：用于 `literature-review-economics` 技能
 6. **Python 3.8+**：用于 `data-analysis` 技能
 7. **Python 依赖库**：pandas、numpy、scipy、statsmodels（用于 `data-analysis` 技能）
-
 
 ## 📝 开发状态
 
@@ -181,7 +202,7 @@ data-analysis
 - ✅ **economic-model-derivation-guidance**：完整，已包含完整推导流程
 - ✅ **literature-review-economics**：完整，已实现智能文献类型判断
 - ✅ **web-access**：完整，v2.4.3 版本
-- ✅ **webofscience-literature-search**：v3.5，集成 web-access，三步检索模式、增量步进自适应滚动、多页翻页提取、本地 Markdown 生成、Node.js 替代 jq
+- ✅ **webofscience-literature-search**：v3.6，新增自动化流水线 `run-search.sh`、SKILL_DIR 绝对路径修复、CDP Proxy `.value` 包装剥离
 
 ## 🔍 注意事项
 
@@ -191,7 +212,7 @@ data-analysis
 4. **数据隐私**：`literature-review-economics` 依赖 Zotero 本地数据库，确保数据安全
 
 ## 📙 问题反馈
-目前项目主要由[某个不想干体力活的Ph D Student](https://github.com/linhuanheng)开发，只是位稍微懂一丢丢代码的金融学博士。很多都是摸着石头过河，感谢愿意把宝贵的token用在我开发的skills上，若有什么问题。可以让AI生成完整详细的执行记录并保存下来后在Issues上留言！感谢各位支持！
+目前项目主要由[某个不想干体力活的 PhD Student](https://github.com/linhuanheng)开发，只是位稍微懂一丢丢代码的金融学博士。很多都是摸着石头过河，感谢愿意把宝贵的token用在我开发的skills上，若有什么问题。可以让AI生成完整详细的执行记录并保存下来后在Issues上留言！感谢各位支持！
 
 ## 📚 相关资源
 
@@ -211,4 +232,4 @@ data-analysis
 
 ---
 
-*最后更新：2026 年 4 月 22 日 (webofscience-literature-search v3.5 同步)*
+*最后更新：2026 年 4 月 22 日 (webofscience-literature-search v3.6 同步)*
