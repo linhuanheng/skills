@@ -187,6 +187,130 @@ bash "$SKILL_DIR/scripts/run-search.sh" "$SEARCH_KEYWORDS" "$JOURNAL_SCOPE" "$YE
 
 **执行后**：读取生成的 Markdown 报告，向用户展示检索结果摘要。
 
+### 相关性分析（检索后执行）
+
+**检索完成并生成 JSON 后，调用相关性分析脚本对文献摘要与用户感兴趣的关键词进行匹配评分**，帮助用户快速筛选高相关文献。提供两种方案：
+
+| 方案 | 脚本 | 适用场景 | 依赖 |
+|------|------|----------|------|
+| 方案一：关键词密度 + TF‑IDF 余弦相似度 | `analyze-relevance.py` | 轻量快速，关键词精确匹配优先 | scikit-learn（可选） |
+| 方案二：Sentence‑BERT 语义匹配 | `analyze-relevance-sbert.py` | 深层语义理解，捕捉同义词/近义词 | sentence-transformers |
+
+#### 方案一：关键词密度 + TF‑IDF 余弦相似度
+
+**核心思路**：将 topic 关键词合并成一串"理想摘要"，计算待检摘要与这条理想文本的 TF‑IDF 向量余弦相似度，同时统计关键词命中率作为辅助信号。综合分数 = 0.6 × TF‑IDF 余弦相似度 + 0.4 × 关键词命中率。
+
+```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
+
+# 用第零步确认的关键词（逗号分隔英文短语，去掉 WoS 运算符）
+TOPIC_KEYWORDS="liquidity,asset pricing,market microstructure,liquidity risk"
+
+# 输入：检索生成的 JSON 和 Markdown 文件
+INPUT_JSON="SEARCH_RESULTS/liquidity_and_asset_pricing_20260422_234641.json"
+INPUT_MD="SEARCH_RESULTS/liquidity_and_asset_pricing_20260422_234641.md"
+
+# 执行相关性分析（方案一）
+# --md-file 将 Top 20 相关文献详细信息追加到检索报告 Markdown 末尾
+python "$SKILL_DIR/scripts/analyze-relevance.py" "$INPUT_JSON" "$TOPIC_KEYWORDS" --threshold 0.15 --md-file "$INPUT_MD"
+
+# 输出文件：
+#   同目录下自动生成 *_enriched.json（每篇论文追加 relevance 字段）
+#   原检索报告 .md 末尾追加 Relevance Analysis 章节（Top 20 详细卡片）
+```
+
+**方案一参数说明**：
+
+| 参数 | 位置 | 说明 | 默认值 |
+|------|------|------|--------|
+| input_json | $1 | 合并后的文献 JSON 文件路径 | — |
+| topic_keywords | $2 | 逗号分隔的英文关键词短语 | — |
+| --output | -o | 输出 enriched JSON 路径 | 自动加 `_enriched` 后缀 |
+| --threshold | -t | 综合相关性阈值 [0,1] | 0.15 |
+| --similarity-only | — | 仅使用 TF‑IDF 相似度，忽略关键词命中率 | 关闭 |
+| --md-file | — | 检索报告 Markdown 路径，将 Top 20 相关文献追加到该文件末尾 | 不追加 |
+
+**方案一 relevance 字段**：
+```json
+{
+  "tfidf_similarity": 0.1926,
+  "keyword_hit_rate": 0.75,
+  "relevance_score": 0.4155
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| tfidf_similarity | TF‑IDF 余弦相似度 (0~1) |
+| keyword_hit_rate | 关键词命中率 (0~1) |
+| relevance_score | 0.6 × tfidf + 0.4 × hit_rate |
+
+#### 方案二：Sentence‑BERT 语义匹配
+
+**核心思路**：用 SBERT (all-MiniLM-L6-v2) 将关键词扩展为自然语言 query（如 "Research about liquidity, asset pricing, and market microstructure"）与论文的 title+abstract 分别编码为 384 维语义向量，计算余弦相似度。语义匹配能捕捉同义词/近义词关系（如 "volatility" vs "risk"），比字面匹配更鲁棒。综合分数 = 0.7 × SBERT 相似度 + 0.3 × 关键词命中率。
+
+```bash
+SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
+
+TOPIC_KEYWORDS="liquidity,asset pricing,market microstructure,liquidity risk"
+INPUT_JSON="SEARCH_RESULTS/liquidity_and_asset_pricing_20260422_234641.json"
+INPUT_MD="SEARCH_RESULTS/liquidity_and_asset_pricing_20260422_234641.md"
+
+# 执行相关性分析（方案二）
+# --md-file 将 Top 20 相关文献详细信息追加到检索报告 Markdown 末尾
+python "$SKILL_DIR/scripts/analyze-relevance-sbert.py" "$INPUT_JSON" "$TOPIC_KEYWORDS" --threshold 0.3 --md-file "$INPUT_MD"
+
+# 可选：提供自然语言描述替代关键词拼接 query（语义更精准）
+python "$SKILL_DIR/scripts/analyze-relevance-sbert.py" "$INPUT_JSON" "$TOPIC_KEYWORDS" \
+  --topic-desc "the relationship between stock market liquidity and asset pricing theories" \
+  --md-file "$INPUT_MD"
+
+# 输出文件：
+#   同目录下自动生成 *_sbert_enriched.json（每篇论文追加 relevance 字段）
+#   原检索报告 .md 末尾追加 Relevance Analysis 章节（Top 20 详细卡片）
+```
+
+**方案二参数说明**：
+
+| 参数 | 位置 | 说明 | 默认值 |
+|------|------|------|--------|
+| input_json | $1 | 合并后的文献 JSON 文件路径 | — |
+| topic_keywords | $2 | 逗号分隔的英文关键词短语 | — |
+| --output | -o | 输出 enriched JSON 路径 | 自动加 `_sbert_enriched` 后缀 |
+| --threshold | -t | 综合相关性阈值 [0,1] | 0.3 |
+| --model | -m | SBERT 模型名 | all-MiniLM-L6-v2 |
+| --similarity-only | — | 仅使用 SBERT 相似度，忽略关键词命中率 | 关闭 |
+| --topic-desc | -d | 对主题的自然语言描述（比关键词更能表达语义） | 自动从关键词生成 |
+| --md-file | — | 检索报告 Markdown 路径，将 Top 20 相关文献追加到该文件末尾 | 不追加 |
+
+**方案二 relevance 字段**：
+```json
+{
+  "sbert_similarity": 0.6917,
+  "keyword_hit_rate": 0.75,
+  "relevance_score": 0.7092
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| sbert_similarity | SBERT 余弦相似度 (0~1) |
+| keyword_hit_rate | 关键词命中率 (0~1) |
+| relevance_score | 0.7 × sbert + 0.3 × hit_rate |
+
+**两种方案对比**：
+
+| 维度 | 方案一（TF‑IDF） | 方案二（SBERT） |
+|------|------------------|-----------------|
+| 语义理解 | 字面匹配 | 深层语义，捕捉同义/近义 |
+| 区分度 | 中等（受词汇重合度限制） | 高（向量空间连续） |
+| 速度 | 秒级 | 首次加载模型 ~7s，编码 ~1s |
+| 依赖 | scikit-learn（可选，有纯 Python 回退） | sentence-transformers（必须） |
+| 推荐阈值 | 0.15 | 0.3 |
+| 适用场景 | 关键词精确、词面重合即可判断 | 需要语义推理、同义表达 |
+
+**执行后**：向用户展示相关性分析摘要（高/低相关文献数量、Top 3 最相关文献、平均分数）。若指定 `--md-file`，Top 20 最相关文献的详细信息（含摘要全文）将追加到检索报告 Markdown 末尾的 `## Relevance Analysis` 章节。
+
 ---
 
 ### 手动分步执行（备用方式）
@@ -913,7 +1037,9 @@ echo "Failure record saved: ${RESULTS_DIR}/${TOPIC_SLUG}_failure_${TIMESTAMP}.md
 | `generate-markdown-report.js` | 从 JSON 生成 Markdown 报告 |
 | `check-data-quality.js` | 数据质量检查 |
 | `check-env.sh` | 环境检测和路径查找 |
-| `run-search.sh` | **自动化流水线**：一步完成步骤 1-5（初始化→输入→搜索→提取→翻页→报告），无需中间交互 |
+| `run-search.sh` | **自动化流水线**：一步完成步骤 1-5（初始化→输入→搜索→提取→翻页→报告），无需中间互联 |
+| `analyze-relevance.py` | **相关性分析（方案一）**：关键词密度 + TF‑IDF 余弦相似度，为每篇论文计算 relevance_score，输出 enriched JSON |
+| `analyze-relevance-sbert.py` | **相关性分析（方案二）**：Sentence-BERT 语义匹配 (all-MiniLM-L6-v2)，深层语义相似度 + 关键词命中率，输出 sbert_enriched JSON |
 | `diagnose-page.js` | 页面诊断 |
 | `json-helper.mjs` | Node.js JSON 处理工具，替代 jq（读取字段、美化保存、URL编码、数组操作、页面文件合并等） |
 
@@ -967,13 +1093,25 @@ click-search-button.js(inputSelector, buttonSelector)  → document.querySelecto
 json-helper.mjs build-final-from-pages（合并所有 page_NNN.json）→ 保存最终 JSON
     ↓
 本地 node -e 脚本 → 从最终 JSON 生成 Markdown 报告
+    ↓
+analyze-relevance.py（方案一：关键词密度 + TF‑IDF 余弦相似度）→ 输出 enriched JSON（每篇论文追加 relevance 字段）
+    ↓ 或
+analyze-relevance-sbert.py（方案二：Sentence-BERT 语义匹配）→ 输出 sbert_enriched JSON
 ```
 
 ---
-*版本：3.6（SKILL_DIR 绝对路径修复版）*
-*更新日期：2026-04-22*
+*版本：3.7（相关性分析版）*
+*更新日期：2026-04-23*
 
 ## 修复日志
+
+### v3.7 (2026-04-23) - 相关性分析版
+- **新增功能：文献相关性分析**：检索完成后可调用分析脚本对每篇论文的摘要与用户感兴趣的关键词进行相关性评分，提供两种方案
+- **方案一**：`scripts/analyze-relevance.py` — 关键词密度 + TF‑IDF 余弦相似度。将 topic 关键词合并成"理想摘要"，计算 TF‑IDF 向量余弦相似度 + 关键词命中率，综合得分 = 0.6 × TF‑IDF + 0.4 × 命中率。依赖 scikit-learn（可选，有纯 Python 回退）
+- **方案二**：`scripts/analyze-relevance-sbert.py` — Sentence‑BERT 语义匹配。用 all-MiniLM-L6-v2 将关键词扩展为自然语言 query 与论文 title+abstract 编码为 384 维向量，计算余弦相似度。语义匹配能捕捉同义词/近义词关系，综合得分 = 0.7 × SBERT + 0.3 × 命中率。依赖 sentence-transformers
+- **`--md-file` 参数**：两个脚本均支持 `--md-file` 参数，指定检索报告 Markdown 文件路径，将 Top 20 最相关文献详细信息（含摘要全文）追加到该文件末尾的 `## Relevance Analysis` 章节。若已存在该章节则替换（支持两种方案覆盖切换）
+- **SKILL.md 新增**：「相关性分析」章节（含两种方案对比表）、脚本一览表新增两个脚本、数据流图追加分析步骤
+- **Windows 兼容**：两个脚本均强制 stdout/stderr 使用 UTF-8 编码，避免 GBK 编码错误
 
 ### v3.6 (2026-04-22) - SKILL_DIR 绝对路径修复版
 - **核心修复：统一使用 SKILL_DIR 绝对路径变量**：原 SKILL.md 中所有脚本引用使用相对路径 `scripts/xxx.js`，但 Claude Code 的 Bash 工具 CWD 是项目目录而非 skill 目录，导致 `cat scripts/xxx.js` 找不到文件。改为在每个 bash 代码块开头声明 `SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"`，所有脚本引用改为 `$SKILL_DIR/scripts/xxx.js`
