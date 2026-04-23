@@ -22,6 +22,8 @@ This directory contains all JavaScript scripts used by the Web of Science litera
 | `diagnose-page.js` | Diagnose page structure and troubleshoot | When scripts fail |
 | `generate-markdown-report.js` | Generate Markdown report from JSON data (**deprecated in SKILL.md** — uses local Node.js instead) | After data extraction |
 | `json-helper.mjs` | Node.js JSON processing tool (jq replacement). Subcommands: read, read-stdin, save-pretty, pretty-stdin, url-encode, length-stdin, add-page-number, merge-arrays, build-final-json, extract-field-stdin, merge-page-files, build-final-from-pages | Throughout the workflow |
+| `analyze-relevance.py` | **Relevance analysis (Plan A)**: keyword density + TF-IDF cosine similarity. Scores each paper's abstract against topic keywords, outputs enriched JSON with `relevance` field per paper | After search JSON generation, before user review |
+| `analyze-relevance-sbert.py` | **Relevance analysis (Plan B)**: Sentence-BERT semantic matching (all-MiniLM-L6-v2, 384-dim embeddings). Captures synonyms/paraphrases that literal matching misses. Outputs sbert_enriched JSON | After search JSON generation, when deeper semantic understanding needed |
 
 ### Data Flow (JSON File)
 
@@ -49,6 +51,10 @@ Pagination Loop (repeated per page):
 json-helper.mjs build-final-from-pages → merge page_NNN.json → save final JSON
     ↓
 Local node -e script → generate Markdown report from final JSON
+    ↓
+analyze-relevance.py → Plan A: keyword density + TF-IDF cosine similarity → output enriched JSON
+    ↓ OR
+analyze-relevance-sbert.py → Plan B: Sentence-BERT semantic matching → output sbert_enriched JSON
 ```
 
 ### Navigation & Control Scripts
