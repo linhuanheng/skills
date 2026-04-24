@@ -41,6 +41,19 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
+# 优先离线模式：避免网络不可达时模型加载失败
+# 设置 HF_HUB_OFFLINE=1 让 HuggingFace 库跳过在线检查，仅使用本地缓存
+# 如果本地无缓存则自动回退为在线模式
+if "HF_HUB_OFFLINE" not in os.environ:
+    # 检测本地是否有缓存模型
+    _hf_cache = os.path.expanduser("~/.cache/huggingface/hub")
+    _model_cached = os.path.exists(os.path.join(_hf_cache, "models--sentence-transformers--all-MiniLM-L6-v2"))
+    if _model_cached:
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        print("[INFO] 检测到本地缓存模型，启用离线模式 (HF_HUB_OFFLINE=1)")
+    else:
+        print("[INFO] 未检测到本地缓存模型，使用在线模式下载")
+
 # ── 依赖检测 ────────────────────────────────────────────────────────
 
 try:
@@ -298,8 +311,31 @@ def main():
     model_name = args.model
     print(f"[INFO] 加载 SBERT 模型: {model_name} ...")
     t0 = time.time()
-    model = SentenceTransformer(model_name)
-    print(f"[INFO] 模型加载耗时: {time.time() - t0:.1f}s")
+    model = None
+
+    # 尝试加载模型：先按当前 HF_HUB_OFFLINE 设置，失败后自动切换
+    for attempt in range(2):
+        offline_mode = os.environ.get("HF_HUB_OFFLINE", "0") == "1"
+        mode_label = "离线" if offline_mode else "在线"
+        try:
+            model = SentenceTransformer(model_name)
+            print(f"[INFO] 模型加载成功（{mode_label}模式），耗时: {time.time() - t0:.1f}s")
+            break
+        except Exception as e:
+            if attempt == 0 and offline_mode:
+                # 离线模式失败，切换到在线模式重试
+                print(f"[WARN] 离线模式加载失败: {e}")
+                print("[INFO] 切换到在线模式重试...")
+                os.environ["HF_HUB_OFFLINE"] = "0"
+                t0 = time.time()
+                continue
+            else:
+                print(f"[ERROR] 模型加载失败（{mode_label}模式）: {e}", file=sys.stderr)
+                sys.exit(1)
+
+    if model is None:
+        print("[ERROR] 未能加载 SBERT 模型", file=sys.stderr)
+        sys.exit(1)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"[INFO] 推理设备: {device}")
