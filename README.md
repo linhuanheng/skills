@@ -5,10 +5,7 @@
 ## 📁 项目结构
 
 ```
-skill_production/
-├── SEARCH_RESULTS/                              # 检索结果输出目录
-│   ├── *.json                                   # 原始检索数据
-│   └── *.md                                     # Markdown 检索报告
+skills/
 ├── data-analysis/                               # 数据分析技能
 ├── economic-model-derivation-guidance/          # 经济模型推导指导技能
 ├── literature-review-economics/                 # 经济金融学文献整理总结技能
