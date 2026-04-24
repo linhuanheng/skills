@@ -84,7 +84,7 @@ build_query() {
   echo "$query"
 }
 
-# Adaptive step-scroll: 500px increments, repeat until page height stabilizes
+# Adaptive step-scroll: 500px increments with delay, repeat until page height stabilizes
 adaptive_scroll() {
   echo "[scroll] Starting adaptive step-scroll..."
   local prev_height=0
@@ -98,6 +98,8 @@ adaptive_scroll() {
       curr_height=$(echo "$scroll_result" | json_read_stdin '.scrollHeight // 0' || echo 0)
       if [ "$offset" -ge "$curr_height" ]; then break; fi
       offset=$((offset + 500))
+      # Give virtual scrolling time to render between steps
+      sleep 0.3
     done
     echo "[scroll] Round $round: height=$curr_height (prev=$prev_height)"
     if [ "$curr_height" -eq "$prev_height" ] && [ "$curr_height" -gt 0 ]; then
@@ -105,7 +107,7 @@ adaptive_scroll() {
       break
     fi
     prev_height=$curr_height
-    sleep 1
+    sleep 2
   done
 }
 
@@ -133,6 +135,20 @@ echo "=== Step 1: Initialize page ==="
 # Check environment
 bash "$SKILL_DIR/scripts/check-env.sh"
 PORT="${CDP_PROXY_PORT:-3457}"
+
+# If proxy switched to a non-default port, kill the old proxy on 3457 first
+# to avoid stale Tab state leaking across proxy instances
+if [ "$PORT" != "3457" ]; then
+  echo "[init] Port conflict detected (using $PORT instead of 3457)"
+  echo "[init] Shutting down stale proxy on port 3457..."
+  curl -s "http://localhost:3457/shutdown" 2>/dev/null || true
+  sleep 2
+  # Restart on the default port now that it's free
+  echo "[init] Restarting proxy on default port 3457..."
+  bash "$SKILL_DIR/scripts/check-env.sh"
+  PORT="${CDP_PROXY_PORT:-3457}"
+  echo "[init] Proxy now on port $PORT"
+fi
 
 # Open WoS advanced search
 OPEN_RESULT=$(curl -s "http://localhost:$PORT/new?url=https://webofscience.clarivate.cn/wos/alldb/advanced-search")
@@ -297,6 +313,16 @@ fi
 echo ""
 echo "=== Step 5: Multi-page extraction ==="
 
+# Reset scroll to top before multi-page extraction starts.
+# After Step 3 the page is scrolled to the bottom, and virtual scrolling
+# unloads DOM elements outside the viewport.  Without scrolling back to top,
+# the re-scroll in Step 5 cannot re-render those unloaded elements, resulting
+# in 0 papers extracted.
+echo "[reset] Scrolling to top to reset virtual scroll state..."
+curl -s -X POST "http://localhost:$PORT/eval?target=$TARGET" \
+  --data-raw "(function(){ window.scrollTo(0,0); return 'ok'; })()"
+sleep 2
+
 TEMP_DIR="${RESULTS_DIR}/temp_pages_$$"
 mkdir -p "$TEMP_DIR"
 
@@ -318,6 +344,13 @@ while [ "$PAGE_NUMBER" -le "$MAX_PAGES" ]; do
       --data-raw "$(cat $SKILL_DIR/scripts/check-page-ready.js)")
     if echo "$PAGE_STATUS" | grep -q '"ready":true'; then break; fi
   done
+
+  # Reset scroll to top (needed after pagination, which may leave page scrolled)
+  if [ "$PAGE_NUMBER" -gt 1 ]; then
+    curl -s -X POST "http://localhost:$PORT/eval?target=$TARGET" \
+      --data-raw "(function(){ window.scrollTo(0,0); return 'ok'; })()"
+    sleep 1
+  fi
 
   # Scroll
   adaptive_scroll

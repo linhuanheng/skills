@@ -37,20 +37,26 @@
 
 (function(scrollTo) {
   try {
-    var pageHeight = Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight
-    );
-
     if (typeof scrollTo === 'number' && scrollTo >= 0) {
       window.scrollTo(0, scrollTo);
     }
 
-    return {
-      success: true,
-      scrollHeight: pageHeight,
-      scrolledTo: typeof scrollTo === 'number' ? Math.min(scrollTo, pageHeight) : -1
-    };
+    // Give virtual scrolling time to render newly visible elements.
+    // WoS uses async rendering; without this delay the DOM hasn't updated
+    // yet when we (or the next call) query scrollHeight.
+    return new Promise(function(resolve) {
+      setTimeout(function() {
+        var pageHeight = Math.max(
+          document.body.scrollHeight,
+          document.documentElement.scrollHeight
+        );
+        resolve({
+          success: true,
+          scrollHeight: pageHeight,
+          scrolledTo: typeof scrollTo === 'number' ? Math.min(scrollTo, pageHeight) : -1
+        });
+      }, 150);
+    });
 
   } catch (error) {
     return {
