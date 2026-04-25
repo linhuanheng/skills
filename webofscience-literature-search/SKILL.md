@@ -86,7 +86,7 @@ INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scri
 **重要：Web of Science 期刊检索必须使用期刊全称**
 
 **金融学顶刊（常用）**：
-1. Journal of Finance
+1. The Journal of Finance
 2. Journal of Financial Economics
 3. Review of Financial Studies
 4. Journal of Financial and Quantitative Analysis
@@ -106,7 +106,7 @@ INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scri
 **选择方式**：
 - 用户可选择"全部期刊"（默认，输入为空）
 - 用户可选择单个或多个期刊全称（用逗号分隔）
-- 示例：`Journal of Finance,Journal of Financial Economics` 表示只在金融学两大顶刊检索
+- 示例：`The Journal of Finance,Review of Financial Studies` 表示只在金融学两大顶刊检索
 - **注意**：多个期刊使用逗号分隔
 
 **AskUserQuestion 示例**：
@@ -114,7 +114,7 @@ INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scri
 问题：请选择您希望检索的期刊范围
 选项：
 1. 全部期刊（不限制）
-2. 金融学顶刊（Journal of Finance, Journal of Financial Economics, Review of Financial Studies）
+2. 金融学顶刊（The Journal of Finance, Journal of Financial Economics, Review of Financial Studies）
 3. 综合顶刊（American Economic Review, Quarterly Journal of Economics, Journal of Political Economy, Econometrica）
 4. 计量/方法顶刊（Journal of Econometrics, Journal of Applied Econometrics）
 5. 指定期刊（手动输入期刊全称，用逗号分隔）
@@ -126,16 +126,16 @@ INPUT_SELECTOR=$(node "$SKILL_DIR/scripts/json-helper.mjs" read "$SKILL_DIR/scri
 2. **生成检索式**：`SEARCH_QUERY="TS=("关键词1" OR "关键词2" OR "关键词3")"`
 3. **记录范围**：
    - `JOURNAL_SCOPE`：**期刊全称（使用逗号分隔）**
-     - 示例：`Journal of Finance,Journal of Financial Economics`
-     - 多个期刊用逗号分隔：`Journal of Finance,Journal of Financial Economics,Review of Financial Studies`
+     - 示例：`The Journal of Finance,Journal of Financial Economics`
+     - 多个期刊用逗号分隔：`The Journal of Finance,Journal of Financial Economics,Review of Financial Studies`
    - `YEAR_RANGE`：时间范围（例如：2018-2024、recent-5-years）
    - `SEARCH_TOPIC`：检索主题描述（中文或英文）
 
 **生成检索式示例**：
 - 关键词: machine learning, financial risk, prediction
-- 期刊: Journal of Finance, Journal of Financial Economics
+- 期刊: The Journal of Finance, Journal of Financial Economics
 - 时间范围: 2018-2024
-- 完整检索式: `TS=("machine learning" OR "financial risk" OR "prediction") AND SO=("Journal of Finance" OR "Journal of Financial Economics") AND PY=(2018-2024)`
+- 完整检索式: `TS=("machine learning" OR "financial risk" OR "prediction") AND SO=("The Journal of Finance" OR "Journal of Financial Economics") AND PY=(2018-2024)`
 
 **时间范围格式**（**必填**，默认最近 5 年）：
 - `recent-5-years`：最近 5 年（**推荐默认值**）
@@ -159,7 +159,7 @@ SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
 SEARCH_KEYWORDS='"liquidity" AND "asset pricing"'
 
 # 期刊范围（逗号分隔期刊全称，空字符串=不限制）
-JOURNAL_SCOPE="Journal of Finance,Journal of Financial Economics,Review of Financial Studies,Journal of Financial and Quantitative Analysis,Review of Finance"
+JOURNAL_SCOPE="The Journal of Finance,Journal of Financial Economics,Review of Financial Studies,Journal of Financial and Quantitative Analysis,Review of Finance"
 
 # 时间范围
 YEAR_RANGE="2021-2026"
@@ -176,7 +176,7 @@ bash "$SKILL_DIR/scripts/run-search.sh" "$SEARCH_KEYWORDS" "$JOURNAL_SCOPE" "$YE
 | 参数 | 位置 | 说明 | 示例 |
 |------|------|------|------|
 | SEARCH_KEYWORDS | $1 | WoS 检索关键词（含逻辑运算符） | `'"liquidity" AND "asset pricing"'` |
-| JOURNAL_SCOPE | $2 | 期刊全称（逗号分隔，空=不限） | `"Journal of Finance,Journal of Financial Economics"` |
+| JOURNAL_SCOPE | $2 | 期刊全称（逗号分隔，空=不限） | `"The Journal of Finance,Journal of Financial Economics"` |
 | YEAR_RANGE | $3 | 发表年份范围 | `"2021-2026"` 或 `"recent-5-years"` |
 | SEARCH_TOPIC | $4 | 检索主题（用于输出文件命名） | `"liquidity and asset pricing"` |
 
@@ -216,16 +216,41 @@ bash "$SKILL_DIR/scripts/run-search.sh" "$SEARCH_KEYWORDS" "$JOURNAL_SCOPE" "$YE
 
 您当前检索结果摘要：
 - 总文献数：XX 篇
-- 主要期刊：Journal of Finance (X篇), ...
+- 主要期刊：The Journal of Finance (X篇), ...
 - 年份范围：2020-2026
 ```
 
-**确认完成后**，使用用户确认的 `TOPIC_KEYWORDS` 执行相关性分析（两种方案任选其一）：
+**确认完成后**，使用用户确认的 `TOPIC_KEYWORDS` 执行相关性分析。
 
-| 方案 | 脚本 | 适用场景 | 依赖 |
-|------|------|----------|------|
-| 方案一：关键词密度 + TF‑IDF 余弦相似度 | `analyze-relevance.py` | 轻量快速，关键词精确匹配优先 | scikit-learn（可选） |
-| 方案二：Sentence‑BERT 语义匹配 | `analyze-relevance-sbert.py` | 深层语义理解，捕捉同义词/近义词 | sentence-transformers |
+**下一步：询问用户选择哪种相关性分析方案**
+
+使用 AskUserQuestion 工具，让用户从以下两种方案中选择：
+
+```
+问题：请选择您希望使用的相关性分析方法
+
+选项：
+1. 方案一：关键词密度 + TF‑IDF 余弦相似度（轻量快速）
+   - 原理：基于关键词命中率和 TF‑IDF 向量余弦相似度
+   - 优势：速度快（秒级），关键词精确匹配优先
+   - 依赖：scikit-learn（可选，有纯 Python 回退）
+   - 推荐阈值：0.15
+
+2. 方案二：Sentence‑BERT 语义匹配（深层语义理解）
+   - 原理：用 all-MiniLM-L6-v2 将关键词和论文摘要编码为语义向量，计算余弦相似度
+   - 优势：能捕捉同义词/近义词关系（如 "volatility" vs "risk"），语义理解更深入
+   - 依赖：sentence-transformers（必须安装）
+   - 注意：首次运行需要下载模型（~80MB），支持离线模式
+   - 推荐阈值：0.3
+```
+
+| 维度 | 方案一（TF‑IDF） | 方案二（SBERT） |
+|------|------------------|-----------------|
+| 语义理解 | 字面匹配 | 深层语义，捕捉同义/近义 |
+| 区分度 | 中等 | 高 |
+| 速度 | 秒级 | 首次加载模型 ~7s，编码 ~1s |
+| 依赖 | scikit-learn（可选） | sentence-transformers（必须） |
+| 适用场景 | 关键词精确、词面匹配即可 | 需要语义推理、同义表达 |
 
 #### 方案一：关键词密度 + TF‑IDF 余弦相似度
 
@@ -329,7 +354,7 @@ python "$SKILL_DIR/scripts/analyze-relevance-sbert.py" "$INPUT_JSON" "$TOPIC_KEY
 | keyword_hit_rate | 关键词命中率 (0~1) |
 | relevance_score | 0.7 × sbert + 0.3 × hit_rate |
 
-**两种方案对比**：
+**两种方案对比**（注意：AI 执行前应已通过 AskUserQuestion 询问用户选择方案一还是方案二）：
 
 | 维度 | 方案一（TF‑IDF） | 方案二（SBERT） |
 |------|------------------|-----------------|
@@ -1131,10 +1156,14 @@ analyze-relevance-sbert.py（方案二：Sentence-BERT 语义匹配）→ 输出
 ```
 
 ---
-*版本：3.8（相关性分析交互+离线模式版）*
+*版本：3.9（相关性分析方案选择版）*
 *更新日期：2026-04-24*
 
 ## 修复日志
+
+### v3.9 (2026-04-24) - 相关性分析方案选择版
+- **新增流程：询问用户选择相关性分析方案**：确认用户感兴趣的话题和关键词后，新增 AskUserQuestion 步骤询问用户选择方案一（TF‑IDF）还是方案二（SBERT）。提供完整的方案说明、对比表格和推荐阈值，让用户根据自身需求和环境（如是否安装 sentence-transformers）做出选择
+- **SKILL.md 更新**：「相关性分析」章节在「确认用户感兴趣的话题」和「执行分析」之间新增「询问选择哪种相关性分析方案」步骤，包含 AskUserQuestion 示例和方案对比表
 
 ### v3.8 (2026-04-24) - 相关性分析交互+离线模式版
 - **新增流程：相关性分析前确认用户兴趣**：「相关性分析」章节新增「第零步：确认用户感兴趣的话题」。检索完成后不再直接启动相关性分析，而是先向用户展示检索结果摘要，使用 AskUserQuestion 询问用户感兴趣的具体方向，从用户描述中提取关键词并确认后才启动分析
