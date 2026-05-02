@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-SKILL_DIR="C:/Users/15815/.claude/skills/webofscience-literature-search"
+SKILL_DIR="${WEBSCIENCE_SKILL_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 source "$SKILL_DIR/scripts/search-utils.sh" 2>/dev/null || true
 
 # ── Arguments ──────────────────────────────────────────────
@@ -132,21 +132,20 @@ extract_papers() {
 
 echo "=== Step 1: Initialize page ==="
 
-# Check environment
+# Check environment and detect proxy port
 bash "$SKILL_DIR/scripts/check-env.sh"
-PORT="${CDP_PROXY_PORT:-3456}"
+PORT=$(cat "$SKILL_DIR/scripts/.cdp_port" 2>/dev/null || echo "${CDP_PROXY_PORT:-3456}")
 
-# If proxy switched to a non-default port, kill the old proxy on 3456 first
-# to avoid stale Tab state leaking across proxy instances
+# If proxy was forced to a non-default port due to conflict, try to reclaim 3456
 if [ "$PORT" != "3456" ]; then
-  echo "[init] Port conflict detected (using $PORT instead of 3456)"
-  echo "[init] Shutting down stale proxy on port 3456..."
+  echo "[init] Port conflict detected (current proxy on $PORT, default is 3456)"
+  echo "[init] Shutting down conflicting proxy on port 3456..."
   curl -s "http://localhost:3456/shutdown" 2>/dev/null || true
   sleep 2
-  # Restart on the default port now that it's free
+  # Re-run env check; default port should now be free
   echo "[init] Restarting proxy on default port 3456..."
   bash "$SKILL_DIR/scripts/check-env.sh"
-  PORT="${CDP_PROXY_PORT:-3456}"
+  PORT=$(cat "$SKILL_DIR/scripts/.cdp_port" 2>/dev/null || echo "${CDP_PROXY_PORT:-3456}")
   echo "[init] Proxy now on port $PORT"
 fi
 

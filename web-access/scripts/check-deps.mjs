@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PROXY_SCRIPT = path.join(ROOT, 'scripts', 'cdp-proxy.mjs');
-const DEFAULT_PROXY_PORT = 3457;
+const DEFAULT_PROXY_PORT = 3456;
 
 // --- 端口可用性检查 ---
 

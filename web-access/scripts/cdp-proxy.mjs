@@ -10,7 +10,7 @@ import path from 'node:path';
 import os from 'node:os';
 import net from 'node:net';
 
-const DEFAULT_PORT = 3457;
+const DEFAULT_PORT = 3456;
 
 // 检查端口是否可占用
 function checkPortAvailable(port, host = '127.0.0.1') {
