@@ -25,7 +25,7 @@ SEARCH_TOPIC="${4:-search}"
 RESULTS_DIR="SEARCH_RESULTS"
 mkdir -p "$RESULTS_DIR"
 
-PORT="${CDP_PROXY_PORT:-3457}"
+PORT="${CDP_PROXY_PORT:-3456}"
 TARGET=""   # will be set when we open the page
 
 # ── Helper functions ───────────────────────────────────────
@@ -134,19 +134,19 @@ echo "=== Step 1: Initialize page ==="
 
 # Check environment
 bash "$SKILL_DIR/scripts/check-env.sh"
-PORT="${CDP_PROXY_PORT:-3457}"
+PORT="${CDP_PROXY_PORT:-3456}"
 
-# If proxy switched to a non-default port, kill the old proxy on 3457 first
+# If proxy switched to a non-default port, kill the old proxy on 3456 first
 # to avoid stale Tab state leaking across proxy instances
-if [ "$PORT" != "3457" ]; then
-  echo "[init] Port conflict detected (using $PORT instead of 3457)"
-  echo "[init] Shutting down stale proxy on port 3457..."
-  curl -s "http://localhost:3457/shutdown" 2>/dev/null || true
+if [ "$PORT" != "3456" ]; then
+  echo "[init] Port conflict detected (using $PORT instead of 3456)"
+  echo "[init] Shutting down stale proxy on port 3456..."
+  curl -s "http://localhost:3456/shutdown" 2>/dev/null || true
   sleep 2
   # Restart on the default port now that it's free
-  echo "[init] Restarting proxy on default port 3457..."
+  echo "[init] Restarting proxy on default port 3456..."
   bash "$SKILL_DIR/scripts/check-env.sh"
-  PORT="${CDP_PROXY_PORT:-3457}"
+  PORT="${CDP_PROXY_PORT:-3456}"
   echo "[init] Proxy now on port $PORT"
 fi
 
