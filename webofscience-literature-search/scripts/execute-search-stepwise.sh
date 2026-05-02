@@ -7,7 +7,7 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # 获取端口
-PORT="${CDP_PROXY_PORT:-3457}"
+PORT="${CDP_PROXY_PORT:-3456}"
 
 # 简单jq替代函数
 jq_value() {

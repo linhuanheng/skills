@@ -74,6 +74,11 @@ echo "=== 启动 web-access 依赖检测 ==="
 # 统一路径处理，Node.js 可以处理正斜杠路径
 node "$WEB_ACCESS_PATH/scripts/check-deps.mjs"
 
+# 将检测到的端口写入临时文件，供父脚本读取
+# 子进程环境变量隔离导致 CDP_PROXY_PORT 无法传播到父进程
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "${CDP_PROXY_PORT:-3456}" > "$SCRIPT_DIR/.cdp_port"
+
 # 检查端口变量
 echo ""
 echo "=== 环境变量检查 ==="
