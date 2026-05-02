@@ -1,11 +1,11 @@
 {
   "success": true,
-  "timestamp": "2026-04-24T12:57:21.737Z",
+  "timestamp": "2026-05-02T12:51:02.830Z",
   "url": "https://webofscience.clarivate.cn/wos/alldb/advanced-search",
   "title": "Advanced search - All Databases",
   "interactiveElements": {
     "links": {
-      "count": 27,
+      "count": 30,
       "elements": [
         {
           "tagName": "A",
@@ -99,6 +99,36 @@
         },
         {
           "tagName": "A",
+          "text": "1",
+          "href": "/wos/alldb/summary/4b80c886-16e5-40a3-ab4b-6aa9bf95637f-01b0d9b265/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "1",
+          "href": "/wos/alldb/summary/e67aff49-b155-4e91-aa13-c877f364070d-01b0d9b264/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
+          "text": "1",
+          "href": "/wos/alldb/summary/19e6271f-1db5-4ded-be2e-ab140b18487e-01b0d9b263/relevance/1",
+          "id": "",
+          "className": "ng-star-inserted",
+          "hasOnClick": false,
+          "role": "",
+          "tabIndex": "none"
+        },
+        {
+          "tagName": "A",
           "text": "",
           "href": "http://lib.jnu.edu.cn/",
           "id": "InstLogoTa-0",
@@ -176,41 +206,11 @@
           "hasOnClick": false,
           "role": "",
           "tabIndex": "none"
-        },
-        {
-          "tagName": "A",
-          "text": "Cookie Policy",
-          "href": "https://clarivate.com/privacy-center/notices-policies/cookie-notice/",
-          "id": "",
-          "className": "",
-          "hasOnClick": false,
-          "role": "",
-          "tabIndex": "none"
-        },
-        {
-          "tagName": "A",
-          "text": "Accessibility",
-          "href": "https://support.proquest.com/s/article/Web-of-Science-Accessibility-Statement?language=en_US ",
-          "id": "",
-          "className": "",
-          "hasOnClick": false,
-          "role": "",
-          "tabIndex": "none"
-        },
-        {
-          "tagName": "A",
-          "text": "Help",
-          "href": "https://webofscience.zendesk.com/hc/en-us",
-          "id": "",
-          "className": "",
-          "hasOnClick": false,
-          "role": "",
-          "tabIndex": "none"
         }
       ]
     },
     "buttons": {
-      "count": 30,
+      "count": 43,
       "elements": [
         {
           "tagName": "BUTTON",
@@ -370,6 +370,18 @@
         },
         {
           "tagName": "BUTTON",
+          "text": "And",
+          "id": "",
+          "className": "mat-mdc-tooltip-trigger dropdown mat-mdc-tooltip-disabled ng-star-inserted",
+          "type": "button",
+          "hasOnClick": false,
+          "ariaLabel": "Select search operator, And",
+          "role": "combobox",
+          "tabIndex": "0",
+          "disabled": false
+        },
+        {
+          "tagName": "BUTTON",
           "text": "Add to query",
           "id": "",
           "className": "search mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-primary m",
@@ -414,7 +426,7 @@
           "ariaLabel": "Clear search query",
           "role": "",
           "tabIndex": "none",
-          "disabled": true
+          "disabled": false
         },
         {
           "tagName": "BUTTON",
@@ -439,23 +451,11 @@
           "role": "combobox",
           "tabIndex": "0",
           "disabled": false
-        },
-        {
-          "tagName": "BUTTON",
-          "text": "Combine Sets",
-          "id": "",
-          "className": "mat-mdc-menu-trigger combine-set-button margin-left-20--reversible mdc-button md",
-          "type": "button",
-          "hasOnClick": false,
-          "ariaLabel": "",
-          "role": "",
-          "tabIndex": "0",
-          "disabled": true
         }
       ]
     },
     "formControls": {
-      "count": 10,
+      "count": 13,
       "elements": [
         {
           "tagName": "INPUT",
@@ -478,7 +478,7 @@
           "name": "search",
           "className": "search-criteria-input ng-untouched ng-pristine ng-valid",
           "placeholder": "Enter or edit your query here. You can also combine previous searches e.g. #5 AND #2 ",
-          "value": "",
+          "value": "TS=(\"pricing efficiency\") AND SO=(\"Journal of Fina",
           "ariaLabel": "",
           "role": "",
           "tabIndex": "none",
@@ -494,6 +494,48 @@
           "placeholder": "",
           "value": "on",
           "ariaLabel": "",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-4-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-3-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
+          "role": "",
+          "tabIndex": "0",
+          "disabled": false,
+          "readonly": false
+        },
+        {
+          "tagName": "INPUT",
+          "type": "checkbox",
+          "id": "mat-mdc-checkbox-2-input",
+          "name": "",
+          "className": "mdc-checkbox__native-control",
+          "placeholder": "",
+          "value": "on",
+          "ariaLabel": "Select this history",
           "role": "",
           "tabIndex": "0",
           "disabled": false,
@@ -653,7 +695,7 @@
       "elements": []
     },
     "btnClassElements": {
-      "count": 51,
+      "count": 78,
       "elements": [
         {
           "tagName": "SPAN",
