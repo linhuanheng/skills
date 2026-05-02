@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__zotero-mcp__get_collections",
+      "mcp__zotero-mcp__get_collection_items",
+      "mcp__zotero-mcp__get_item_details",
+      "mcp__zotero-mcp__get_content",
+      "mcp__zotero-mcp__search_library",
+      "Bash(python3)",
+      "Bash(grep -oP '\\(?:references|References|References|Bibliography\\).*?\\(?=$$\\\\d{4}$$\\\\s*\\\\d{1,3}\\)' \"C:\\\\Users\\\\15815\\\\.claude\\\\projects\\\\e--Claude-code-skills\\\\a873aab9-5991-4b84-8c24-d5408fc10e77\\\\tool-results\\\\call_00_xFEBy97d7ZSNp0wKSbVOKFEh.json\")",
+      "Bash(python \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\cross_check_refs.py\" --candidates \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\test_candidates.json\" --refs \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\test_refs.txt\" --output \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\test_validated.json\" --verbose)",
+      "Bash(python \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\debug_test.py\")",
+      "Bash(node -e ' *)",
+      "Bash(python \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\cross_check_refs.py\" --candidates \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\new_candidates.json\" --refs \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\patton_refs.txt\" --output \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\validated_new.json\" --verbose)",
+      "Bash(python \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\cross_check_refs.py\" --candidates \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\new_candidates.json\" --refs \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\patton_refs2.txt\" --output \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\validated_new.json\" --verbose)",
+      "Bash(python \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\cross_check_refs.py\" --candidates \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\new_candidates.json\" --refs \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\patton_refs3.txt\" --output \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\validated_new.json\" --verbose)",
+      "Bash(python \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\cross_check_refs.py\" --candidates \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\new_candidates.json\" --refs \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\patton_refs.txt\" --output \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\test_v2_output.json\" --verbose)",
+      "Bash(python \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\cross_check_refs.py\" --candidates \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\new_candidates.json\" --refs \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\patton_refs3.txt\" --output \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\test_v2b_output.json\" --verbose)",
+      "Bash(python \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\cross_check_refs.py\" --candidates \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\test_candidates.json\" --refs \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\test_refs.txt\" --output \"e:\\\\Claude code\\\\skills\\\\quantitative-theory-kb\\\\scripts\\\\test_legacy.json\" --verbose)",
+      "Bash(python \"e:/Claude code/skills/quantitative-theory-kb/scripts/cross_check_refs.py\" --candidates \"e:/Claude code/skills/quantitative-theory-kb/scripts/round3_candidates.json\" --refs \"e:/Claude code/skills/quantitative-theory-kb/scripts/fz_refs.txt\" --output \"e:/Claude code/skills/quantitative-theory-kb/scripts/fz_validated.json\" --verbose)",
+      "Bash(python \"e:/Claude code/skills/quantitative-theory-kb/scripts/cross_check_refs.py\" --candidates \"e:/Claude code/skills/quantitative-theory-kb/scripts/round3_candidates.json\" --refs \"e:/Claude code/skills/quantitative-theory-kb/scripts/patton_refs_final.txt\" --output \"e:/Claude code/skills/quantitative-theory-kb/scripts/final_validated.json\" --verbose)",
+      "Bash(python \"e:/Claude code/skills/quantitative-theory-kb/scripts/cross_check_refs.py\" --candidates \"e:/Claude code/skills/quantitative-theory-kb/scripts/round4_candidates.json\" --refs \"e:/Claude code/skills/quantitative-theory-kb/scripts/r4_patton_refs.txt\" --output \"e:/Claude code/skills/quantitative-theory-kb/scripts/r4_validated.json\" --verbose)"
+    ]
+  }
+}
