@@ -155,15 +155,6 @@ data-analysis
    - `data-analysis`：pandas、numpy、scipy、statsmodels
    - `webofscience-literature-search`：scikit-learn（TF-IDF，可选）、sentence-transformers（SBERT，推荐）
 
-## 📝 开发状态
-
-- ✅ **quantitative-theory-kb**：完整，包含六阶段工作流（需求调研→初始化→条目构建→质量控制→文献扩展→增量更新），内置评估用例和示例知识库
-- ✅ **data-analysis**：完整，包含描述性统计、缺失值分析、异常值检测、数据类型识别、自相关分析、平稳性检验
-- ✅ **economic-model-derivation-guidance**：完整，已包含完整推导流程
-- ✅ **literature-review-economics**：完整，已实现智能文献类型判断
-- ✅ **web-access**：完整
-- ✅ **webofscience-literature-search**：完整，支持自动化流水线和相关性分析
-
 ## 🔍 注意事项
 
 1. **权限配置**：确保 `.claude/settings.local.json` 中的权限设置支持所需的 Bash 命令
