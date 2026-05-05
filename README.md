@@ -5,10 +5,6 @@
 ## 📁 项目结构
 
 ```
-skill_production/
-├── SEARCH_RESULTS/                              # 检索结果输出目录
-│   ├── *.json                                   # 原始检索数据
-│   └── *.md                                     # Markdown 检索报告
 ├── data-analysis/                               # 数据分析技能
 ├── economic-model-derivation-guidance/          # 经济模型推导指导技能
 ├── literature-review-economics/                 # 经济金融学文献整理总结技能
@@ -16,7 +12,6 @@ skill_production/
 │   ├── evals/                                   # 评估用例
 │   ├── examples/                                # 完整案例（含已构建知识库）
 │   └── scripts/                                 # 工具脚本（文献交叉核对等）
-├── web-access/                                  # 网页访问技能（基础依赖）
 └── webofscience-literature-search/              # Web of Science 学术文献检索技能
     └── scripts/                                 # 检索与分析脚本
         ├── run-search.sh                        # 自动化流水线脚本（一键检索）
@@ -98,14 +93,13 @@ skill_production/
 
 ### 6. **web-access** — 网页访问（基础依赖）
 
-所有联网操作必须通过此 skill 处理，包括搜索、网页抓取、登录后操作、网络交互等。
+[web-access](https://web-access.eze.is)所有联网操作必须通过此 skill 处理，包括搜索、网页抓取、登录后操作、网络交互等。
 
 **核心特点**：
 
 - CDP 浏览器模式：直连用户日常 Chrome，天然携带登录态
 - 联网策略自动选择：WebSearch / WebFetch / curl / Jina / CDP
 - 站点经验积累：按域名存储操作经验，跨 session 复用
-- 自动关闭功能：默认 5 分钟空闲超时自动关闭 Proxy
 
 **技术依赖**：Node.js 22+ 和 Chrome 开启远程调试
 
