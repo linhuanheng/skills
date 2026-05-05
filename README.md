@@ -10,7 +10,9 @@ skills/
 ├── economic-model-derivation-guidance/          # 经济模型推导指导技能
 ├── literature-review-economics/                 # 经济金融学文献整理总结技能
 ├── quantitative-theory-kb/                      # 数理理论框架知识库构建技能
-├── web-access/                                  # 网页访问技能（基础依赖）
+│   ├── evals/                                   # 评估用例
+│   ├── examples/                                # 完整案例（含已构建知识库）
+│   └── scripts/                                 # 工具脚本（文献交叉核对等）
 └── webofscience-literature-search/              # Web of Science 学术文献检索技能
     └── scripts/                                 # 检索与分析脚本
         ├── run-search.sh                        # 自动化流水线脚本（一键检索）
@@ -70,6 +72,10 @@ skills/
 - 统一的知识条目模板（含 YAML frontmatter 元数据）
 - 知识依赖图驱动的渐进式构建（先修概念优先），三维度深度控制（概览级/标准级/深入级）
 - 自动建立跨领域交叉引用，LaTeX 数学表述支持 MathJax 渲染
+- **深入级模式**：支持与 Zotero 文库集成，构建前评估文献与领域的相关性，构建时逐条目精读文献核心章节
+- **文献扩展流程**：支持从核心文献的引言和参考文献中自动提取高关联文献，经顶刊筛选后纳入知识库
+- **增量更新机制**：支持从 Zotero 或本地文件（PDF/Markdown/LaTeX）持续补充知识库
+- 内置示例知识库（多资产 ES 时间序列建模，25 个文件/14 个知识条目）
 
 **适用场景**：构建计量理论基础、运筹学方法论、数学/泛函分析基础概念、微观/宏观/契约等经济学理论框架、资产定价/风险管理等金融学理论框架
 
@@ -88,14 +94,13 @@ skills/
 
 ### 6. **web-access** — 网页访问（基础依赖）
 
-所有联网操作必须通过此 skill 处理，包括搜索、网页抓取、登录后操作、网络交互等。
+[web-access](https://web-access.eze.is)所有联网操作必须通过此 skill 处理，包括搜索、网页抓取、登录后操作、网络交互等。
 
 **核心特点**：
 
 - CDP 浏览器模式：直连用户日常 Chrome，天然携带登录态
 - 联网策略自动选择：WebSearch / WebFetch / curl / Jina / CDP
 - 站点经验积累：按域名存储操作经验，跨 session 复用
-- 自动关闭功能：默认 5 分钟空闲超时自动关闭 Proxy
 
 **技术依赖**：Node.js 22+ 和 Chrome 开启远程调试
 
@@ -152,7 +157,7 @@ data-analysis
 
 ## 📝 开发状态
 
-- ✅ **quantitative-theory-kb**：框架搭建完成，包含六大领域覆盖、五种条目类型、交互式构建流程
+- ✅ **quantitative-theory-kb**：完整，包含六阶段工作流（需求调研→初始化→条目构建→质量控制→文献扩展→增量更新），内置评估用例和示例知识库
 - ✅ **data-analysis**：完整，包含描述性统计、缺失值分析、异常值检测、数据类型识别、自相关分析、平稳性检验
 - ✅ **economic-model-derivation-guidance**：完整，已包含完整推导流程
 - ✅ **literature-review-economics**：完整，已实现智能文献类型判断
@@ -185,4 +190,4 @@ data-analysis
 
 ---
 
-最后更新：2026 年 4 月 24 日
+最后更新：2026 年 5 月 3 日
