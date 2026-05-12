@@ -46,6 +46,7 @@ skills/
 - 纯理论推导，仅生成 Markdown 文档
 - 支持消费者理论、厂商理论、宏观模型、金融模型、博弈论模型等
 - 五部分结构：问题背景 → 模型设定 → 数学推导 → 均衡分析 → 比较静态分析
+- 可选集成项目知识库：优先查阅 `knowledge-base/`（由 quantitative-theory-kb 构建）获取理论参考，无知识库时则直接推导
 
 **适用场景**：经济学理论模型推导、学术研究中的数学建模、经济学课程作业辅导
 
@@ -142,6 +143,9 @@ quantitative-theory-kb
     ├── zotero-mcp（深入级模式、文献扩展、增量更新时依赖 Zotero 文库访问）
     ├── Python 3.8+（参考文献交叉核对脚本 cross_check_refs.py）
     └── markitdown MCP（本地 PDF 文献解析，可选）
+
+economic-model-derivation-guidance
+    └── knowledge-base/（可选，优先查阅由 quantitative-theory-kb 构建的知识库获取理论参考）
 
 web-access
     ├── webofscience-literature-search（依赖 web-access 进行网页访问）
