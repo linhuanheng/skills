@@ -127,6 +127,7 @@ skills/
 - CDP 浏览器模式：直连用户日常 Chrome，天然携带登录态
 - 联网策略自动选择：WebSearch / WebFetch / curl / Jina / CDP
 - 站点经验积累：按域名存储操作经验，跨 session 复用
+- 端口可用校验和端口冲突切换由[某个不想干体力活的PhD Student](https://github.com/linhuanheng)补充开发
 
 **技术依赖**：Node.js 22+ 和 Chrome 开启远程调试
 
