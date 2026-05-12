@@ -632,12 +632,13 @@ economic_model/
 
 ## 参考资源
 
-### 教科书
-- Varian, H. R. *Microeconomic Analysis* (消费者、厂商理论)
-- Romer, D. *Advanced Macroeconomics* (宏观模型)
-- Cochrane, J. H. *Asset Pricing* (金融模型)
-- Ljungqvist, L. & Sargent, T. J. *Recursive Macroeconomic Theory* (动态模型)
-- Osborne, M. J. *An Introduction to Game Theory* (博弈论)
+### 项目知识库
+优先查阅项目路径下的 `knowledge-base/` 目录（由 quantitative-theory-kb skill 构建）。该知识库涵盖计量理论、运筹学、数学分析、泛函分析、经济学理论框架、金融学理论框架等领域，可为模型推导提供数学工具和理论参考。
+
+**使用规则**：
+1. 在推导前，检查项目根目录下是否存在 `knowledge-base/` 目录
+2. 若存在，查阅相关领域索引（如 `knowledge-base/04-economic-theory/`、`knowledge-base/05-finance-theory/` 等）获取理论背景和数学工具参考
+3. 若不存在，跳过知识库查阅，直接基于用户需求和模型设定进行推导，不得编造知识库内容
 
 ## 重要提示
 
