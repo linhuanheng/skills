@@ -6,6 +6,7 @@
 
 ```
 skills/
+├── academic-paper-ppt/                           # 学术论文 PPT 制作技能
 ├── data-analysis/                               # 数据分析技能
 ├── economic-model-derivation-guidance/          # 经济模型推导指导技能
 ├── literature-review-economics/                 # 经济金融学文献整理总结技能
@@ -101,7 +102,22 @@ skills/
   - SBERT 方案：all-MiniLM-L6-v2 语义匹配，支持离线模式
 - **导出格式**：JSON 原始数据 + Markdown 报告（含分布统计、高引论文、Top 20 相关文献）
 
-### 6. **web-access** — 网页访问（基础依赖）
+### 6. **academic-paper-ppt** — 学术论文 PPT 制作
+
+从学术论文（PDF 或 Zotero 条目）生成 LaTeX beamer 学术幻灯片，覆盖文献阅读→总结→侧重→PPT 编译的完整流程。
+
+**核心特点**：
+
+- 双输入模式：支持 PDF 文件直接读取 或 Zotero 条目自动提取全文
+- 三步报告产出：初步总结（类型判断+贡献+概要）→ 侧重详细报告 → 关联映射报告
+- 六类展示侧重点：理论框架/实证方法设计/实证结果/数据变量/文献贡献/自定义
+- 事实核查：所有定量数字、统计结论标注原文出处（Section/Table/Row）
+- 图片占位→替换两阶段编译：先用 `[Figure X insert here]` 占位编译检查排版，用户确认图片路径后再替换重编译
+- 九条排版规则：字体统一、表格居中、垂直布局、页面防溢出等
+
+**适用场景**：学术组会汇报、论文答辩 slides、期刊俱乐部演示、学术报告幻灯片
+
+### 7. **web-access** — 网页访问（基础依赖）
 
 [web-access](https://web-access.eze.is)所有联网操作必须通过此 skill 处理，包括搜索、网页抓取、登录后操作、网络交互等。
 
@@ -116,6 +132,12 @@ skills/
 ## 🔄 技能依赖关系
 
 ```
+academic-paper-ppt
+    ├── pdf（PDF 文件读取）
+    ├── zotero-mcp（Zotero 文献条目提取）
+    ├── pdflatex / xelatex（LaTeX beamer 编译）
+    └── markitdown MCP（PDF 解析，可选）
+
 quantitative-theory-kb
     ├── zotero-mcp（深入级模式、文献扩展、增量更新时依赖 Zotero 文库访问）
     ├── Python 3.8+（参考文献交叉核对脚本 cross_check_refs.py）
@@ -140,6 +162,7 @@ data-analysis
 3. **文献检索**：使用 `webofscience-literature-search` 检索相关文献
 4. **文献整理**：使用 `literature-review-economics` 整理检索到的文献
 5. **理论建模**：使用 `economic-model-derivation-guidance` 构建理论模型
+6. **汇报展示**：使用 `academic-paper-ppt` 将论文转化为学术幻灯片
 
 ### 单一技能使用
 各技能可独立使用，无需按顺序执行。
@@ -158,11 +181,12 @@ data-analysis
 
 1. **Node.js 22+**：所有技能运行的基础环境
 2. **Chrome 浏览器**：开启远程调试（chrome://inspect/#remote-debugging）
-3. **Zotero 及 zotero-mcp 服务器**：用于 `literature-review-economics` 技能
+3. **Zotero 及 zotero-mcp 服务器**：用于 `literature-review-economics` 和 `academic-paper-ppt` 技能
 4. **Web of Science 校园网访问**：用于 `webofscience-literature-search` 技能（需机构订阅）
-5. **MarkItDown MCP 服务**：用于 `literature-review-economics` 技能
-6. **Python 3.8+**：用于 `data-analysis` 和文献相关性分析
-7. **Python 依赖库**：
+5. **MarkItDown MCP 服务**：用于 `literature-review-economics` 和 `academic-paper-ppt` 技能
+6. **LaTeX 发行版**（TeX Live / MiKTeX）：用于 `academic-paper-ppt` 的 beamer 编译，建议安装 xelatex 以支持中文
+7. **Python 3.8+**：用于 `data-analysis` 和文献相关性分析
+8. **Python 依赖库**：
    - `data-analysis`：pandas、numpy、scipy、statsmodels
    - `webofscience-literature-search`：scikit-learn（TF-IDF，可选）、sentence-transformers（SBERT，推荐）
 
